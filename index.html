@@ -18,56 +18,63 @@
         <h1>Água</h1>
       </div>
       <button class="icon-btn" id="open-settings" aria-label="Ajustes">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.5" fill="var(--card)"/><circle cx="15" cy="17" r="2.5" fill="var(--card)"/></svg>
       </button>
     </header>
 
-    <section class="card ring-card">
-      <div class="ring-wrap">
-        <svg class="ring" viewBox="0 0 200 200" aria-hidden="true">
-          <defs>
-            <linearGradient id="water" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#64d2ff"/>
-              <stop offset="1" stop-color="#0a84ff"/>
-            </linearGradient>
-          </defs>
-          <circle class="ring-track" cx="100" cy="100" r="86"/>
-          <circle class="ring-fill" id="ring-fill" cx="100" cy="100" r="86" transform="rotate(-90 100 100)"/>
-          <line class="ring-pace" id="ring-pace" x1="100" y1="2" x2="100" y2="26"/>
-        </svg>
-        <div class="ring-center">
-          <p class="total"><span id="total">0,0</span><small> L</small></p>
-          <p class="goal">de <span id="goal">2,5</span> L</p>
-        </div>
-      </div>
-      <p class="status" id="status"></p>
-      <div class="actions">
-        <button class="btn primary" id="add-btn">Registrar</button>
-        <button class="btn toggle" id="train-btn" aria-pressed="false">Treinei hoje</button>
+    <!-- Copo: a camada "seca" e a "molhada" têm o mesmo conteúdo;
+         a molhada é recortada pelo nível da água e aparece em branco por cima. -->
+    <section class="glass" id="glass" aria-live="polite">
+      <div class="water"></div>
+      <div class="glass-layer" id="layer-dry"></div>
+      <div class="water-clip">
+        <div class="glass-layer wet" id="layer-wet" aria-hidden="true"></div>
       </div>
     </section>
 
     <section class="card">
       <div class="card-head">
-        <h2>Semana</h2>
-        <p class="muted small" id="week-summary"></p>
+        <h2>Últimos 7 dias</h2>
+      </div>
+      <div class="stats">
+        <div><p class="stat-value" id="week-met">0<small>/7</small></p><p class="stat-label">dias na meta</p></div>
+        <div><p class="stat-value" id="week-avg">—</p><p class="stat-label">média diária</p></div>
       </div>
       <div class="week" id="week"></div>
     </section>
 
     <section class="card">
-      <div class="card-head"><h2>Hoje</h2></div>
+      <div class="card-head">
+        <h2>Hoje</h2>
+        <p class="muted small" id="today-count"></p>
+      </div>
       <ul class="list" id="today-list"></ul>
     </section>
   </main>
 
+  <nav class="dock">
+    <div class="dock-inner">
+      <button class="dock-main" id="quick-add">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span class="dock-text"><b id="quick-label">Registrar</b><small id="quick-ml"></small></span>
+      </button>
+      <button class="dock-more" id="add-btn" aria-label="Outras opções">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+      </button>
+    </div>
+  </nav>
+
   <div class="toast" id="toast" role="status" hidden>
+    <span class="toast-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2.5S5 10.4 5 15a7 7 0 0 0 14 0c0-4.6-7-12.5-7-12.5z"/></svg>
+    </span>
     <span id="toast-text"></span>
     <button id="toast-action"></button>
   </div>
 
   <dialog class="sheet" id="add-sheet">
     <div class="sheet-body">
+      <div class="grabber"></div>
       <div class="sheet-head">
         <h2>Registrar</h2>
         <button class="link-btn" data-close>Cancelar</button>
@@ -78,6 +85,7 @@
 
   <dialog class="sheet" id="settings-sheet">
     <div class="sheet-body">
+      <div class="grabber"></div>
       <div class="sheet-head">
         <h2>Ajustes</h2>
         <button class="link-btn bold" data-close>OK</button>
@@ -88,15 +96,15 @@
         <label class="row">Peso
           <span class="field"><input id="set-weight" type="number" inputmode="decimal" placeholder="—"> kg</span>
         </label>
-        <div class="row" id="suggest-row" hidden>
-          <span class="muted" id="suggest-text"></span>
-          <button class="link-btn" id="suggest-use">Usar</button>
+        <div class="row suggest" id="suggest-row" hidden>
+          <span id="suggest-text"></span>
+          <button class="pill-btn" id="suggest-use">Usar</button>
         </div>
         <label class="row">Meta
           <span class="field"><input id="set-goal" type="number" inputmode="numeric"> ml</span>
         </label>
       </div>
-      <p class="group-note">Referência: ~35 ml por kg. Em dias de treino, use “Treinei hoje” (+500 ml).</p>
+      <p class="group-note">Referência: cerca de 35 ml por kg. Em dias de treino, toque em “Treino” no copo (+500 ml).</p>
 
       <p class="group-title">Ritmo</p>
       <div class="group">
@@ -107,11 +115,11 @@
           <span class="field"><input id="set-end" type="number" inputmode="numeric"> h</span>
         </label>
       </div>
-      <p class="group-note">O marcador no anel mostra onde você deveria estar a cada hora.</p>
+      <p class="group-note">A linha tracejada no copo mostra quanto você já deveria ter bebido a cada hora.</p>
 
       <p class="group-title">Garrafas</p>
       <div class="group" id="tag-list"></div>
-      <div class="group add-tag">
+      <div class="group">
         <div class="row">
           <input id="new-tag-label" placeholder="Nova garrafa" aria-label="Nome da garrafa">
           <span class="field"><input id="new-tag-ml" type="number" inputmode="numeric" placeholder="500"> ml</span>
