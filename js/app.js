@@ -9,7 +9,6 @@ const DEFAULT_BOTTLE_ML = 500;
 const ICONS = {
   bottle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4M10 2v3l-2 2.5V20a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7.5L14 5V2"/><path d="M8 12h8"/></svg>',
   glass: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14l-1.6 16.2A2 2 0 0 1 15.4 21H8.6a2 2 0 0 1-2-1.8z"/><path d="M6 9h12"/></svg>',
-  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>',
   bolt: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
 };
 
@@ -56,6 +55,7 @@ function mainTag(tags, drinks) {
 // Render
 
 let shownTotal = 0;
+let selectedDay = null;
 
 async function render() {
   const [s, tags, boosts] = await Promise.all([store.getSettings(), store.listTags(), store.getBoosts()]);
@@ -97,6 +97,9 @@ function renderGlass({ total, goal, s, now, trained, bottleMl }) {
   glass.classList.toggle('is-full', pct >= 1);
 
   const html = `
+    <div class="pace" ${showPace ? '' : 'hidden'}>
+      <span data-full="Ritmo agora · ${liters(expected)} L" data-short="${liters(expected)} L">Ritmo agora · ${liters(expected)} L</span>
+    </div>
     <div class="glass-content">
       <div class="glass-top">
         <span class="chip tone-${tone}">${statusText}</span>
@@ -108,14 +111,44 @@ function renderGlass({ total, goal, s, now, trained, bottleMl }) {
         <p class="amount"><span class="num">${liters(shownTotal)}</span><span class="unit">L</span></p>
         <p class="of">de <b>${liters(goal)} L</b>${remaining ? ` · faltam ${amount(remaining)}` : ''}</p>
       </div>
-    </div>
-    <div class="pace" ${showPace ? '' : 'hidden'}><span>Ritmo agora · ${liters(expected)} L</span></div>`;
+    </div>`;
 
   $('#layer-dry').innerHTML = html;
   $('#layer-wet').innerHTML = html;
   $('#glass').setAttribute('aria-label',
     `${liters(total)} de ${liters(goal)} litros. ${statusText}.`);
   countTo(total);
+  if (showPace) hidePaceLabelOnCollision();
+}
+
+// Evita que a linha de ritmo e seu rótulo passem por cima de outros elementos do copo
+function hidePaceLabelOnCollision() {
+  const dry = $('#layer-dry');
+  const overlaps = (r, o, pad) =>
+    r.left < o.right + pad && r.right > o.left - pad && r.top < o.bottom + pad && r.bottom > o.top - pad;
+  const rects = (sel) => [...dry.querySelectorAll(sel)].map((el) => el.getBoundingClientRect());
+
+  const pace = dry.querySelector('.pace');
+  const lineHit = rects('.chip, .train').some((o) => overlaps(pace.getBoundingClientRect(), o, 4));
+  const texts = rects('.chip, .train, .num, .unit, .of');
+  const labelHit = () => texts.some((o) => overlaps(pace.querySelector('span').getBoundingClientRect(), o, 5));
+
+  // Tenta o rótulo completo e depois o curto, acima e abaixo da linha; se nada couber, só a linha
+  const span = pace.querySelector('span');
+  const variants = [[span.dataset.full, false], [span.dataset.full, true], [span.dataset.short, false], [span.dataset.short, true]];
+  const fit = variants.find(([text, below]) => {
+    span.textContent = text;
+    pace.classList.toggle('below', below);
+    return !labelHit();
+  });
+
+  document.querySelectorAll('#glass .pace').forEach((el) => {
+    el.classList.toggle('off', lineHit);
+    el.classList.toggle('no-label', !fit);
+    if (!fit) return;
+    el.classList.toggle('below', fit[1]);
+    el.querySelector('span').textContent = fit[0];
+  });
 }
 
 // Anima o número do total até o valor novo
@@ -158,15 +191,25 @@ function renderWeek(today, totals, goalFor) {
     if (isMet) met++;
     if (t > 0) { sum += t; days++; }
 
-    const classes = ['day', i === 0 && 'today', isMet && 'met'].filter(Boolean).join(' ');
+    const classes = ['day', i === 0 && 'today', isMet && 'met', k === selectedDay && 'selected']
+      .filter(Boolean).join(' ');
     const short = d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
     const label = i === 0 ? 'Hoje' : short.charAt(0).toUpperCase() + short.slice(1, 3);
     el.insertAdjacentHTML('beforeend', `
-      <div class="${classes}" aria-label="${label}: ${liters(t)} litros">
+      <button class="${classes}" data-day="${k}" aria-label="${label}: ${liters(t)} litros">
         <div class="bar"><i style="height:${Math.min(t / g, 1) * 100}%"></i></div>
         <span class="day-label">${label}</span>
-      </div>`);
+      </button>`);
   }
+
+  if (selectedDay && !el.querySelector(`[data-day="${selectedDay}"]`)) selectedDay = null;
+  const sel = selectedDay ?? dayKey(today);
+  const selDate = new Date(`${sel}T12:00`);
+  const selName = sel === dayKey(today)
+    ? 'Hoje'
+    : selDate.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' }).replace('.', '');
+  $('#week-detail').innerHTML =
+    `${selName.charAt(0).toUpperCase() + selName.slice(1)} · <b>${liters(totals[sel] ?? 0)} L</b> de ${liters(goalFor(sel))} L`;
 
   $('#week-met').innerHTML = `${met}<small>/7</small>`;
   $('#week-avg').innerHTML = days ? `${liters(sum / days)}<small> L</small>` : '—';
@@ -174,6 +217,7 @@ function renderWeek(today, totals, goalFor) {
 
 function renderToday(list, tags) {
   const el = $('#today-list');
+  openRow = null;
   el.innerHTML = '';
   $('#today-count').textContent = list.length
     ? `${list.length} registro${list.length > 1 ? 's' : ''}`
@@ -192,18 +236,78 @@ function renderToday(list, tags) {
 
     const li = document.createElement('li');
     li.innerHTML = `
-      <span class="ico">${d.tagToken ? ICONS.bottle : ICONS.glass}</span>
-      <span class="entry"><b></b><span>${time} · ${via}</span></span>
-      <span class="entry-ml">${d.ml} ml</span>
-      <button class="del" aria-label="Remover">${ICONS.close}</button>`;
+      <button class="swipe-del">Apagar</button>
+      <div class="swipe">
+        <span class="ico">${d.tagToken ? ICONS.bottle : ICONS.glass}</span>
+        <span class="entry"><b></b><span>${time} · ${via}</span></span>
+        <span class="entry-ml">${d.ml} ml</span>
+      </div>`;
     li.querySelector('.entry b').textContent = label;
-    li.querySelector('.del').onclick = async () => {
-      if (!confirm(`Remover ${d.ml} ml das ${time}?`)) return;
+    li.querySelector('.swipe-del').onclick = async () => {
       await store.removeDrink(d.id);
-      render();
+      await render();
+      toast(`${d.ml} ml removidos`, 'Desfazer', async () => {
+        await store.restoreDrink(d);
+        await render();
+      });
     };
+    bindSwipe(li);
     el.append(li);
   }
+}
+
+// Deslizar para a esquerda revela o botão "Apagar"
+const SWIPE_W = 88;
+let openRow = null;
+
+function setRowOffset(li, x) {
+  li.querySelector('.swipe').style.transform = x ? `translateX(${x}px)` : '';
+}
+
+function closeOpenRow() {
+  if (openRow) setRowOffset(openRow, 0);
+  openRow = null;
+}
+
+function bindSwipe(li) {
+  let startX = 0;
+  let startY = 0;
+  let base = 0;
+  let mode = null; // null | 'swipe' | 'scroll'
+
+  li.addEventListener('touchstart', (e) => {
+    if (openRow && openRow !== li) closeOpenRow();
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    base = openRow === li ? -SWIPE_W : 0;
+    mode = null;
+  }, { passive: true });
+
+  li.addEventListener('touchmove', (e) => {
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+    if (!mode && Math.abs(dx) + Math.abs(dy) > 8) mode = Math.abs(dx) > Math.abs(dy) ? 'swipe' : 'scroll';
+    if (mode !== 'swipe') return;
+    li.classList.add('dragging');
+    setRowOffset(li, Math.min(0, Math.max(-SWIPE_W * 1.3, base + dx)));
+  }, { passive: true });
+
+  li.addEventListener('touchend', (e) => {
+    li.classList.remove('dragging');
+    if (mode !== 'swipe') {
+      // Toque simples numa linha aberta a fecha
+      if (!mode && openRow === li && !e.target.closest('.swipe-del')) closeOpenRow();
+      return;
+    }
+    const dx = e.changedTouches[0].clientX - startX;
+    if (base + dx < -SWIPE_W / 2) {
+      setRowOffset(li, -SWIPE_W);
+      openRow = li;
+    } else {
+      setRowOffset(li, 0);
+      if (openRow === li) openRow = null;
+    }
+  });
 }
 
 function renderDock(main) {
@@ -465,6 +569,12 @@ async function init() {
   bindSettings();
   $('#add-btn').onclick = openAdd;
   $('#open-settings').onclick = openSettings;
+  $('#week').addEventListener('click', (e) => {
+    const day = e.target.closest('[data-day]');
+    if (!day) return;
+    selectedDay = day.dataset.day === selectedDay ? null : day.dataset.day;
+    render();
+  });
   $('#glass').addEventListener('click', (e) => {
     if (e.target.closest('[data-action="train"]')) toggleTraining();
   });

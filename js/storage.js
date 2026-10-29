@@ -99,6 +99,14 @@ export async function addDrink({ ml, tagToken = null, source = 'manual' }) {
   return drink;
 }
 
+// Recoloca um registro removido (desfazer), mantendo a ordem cronológica
+export async function restoreDrink(drink) {
+  mutate((d) => {
+    d.drinks.push(drink);
+    d.drinks.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  });
+}
+
 export async function removeDrink(id) {
   mutate((d) => { d.drinks = d.drinks.filter((x) => x.id !== id); });
 }
