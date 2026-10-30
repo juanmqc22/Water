@@ -32,6 +32,17 @@ O XP é calculado a partir dos registros reais, então desfazer também desfaz o
 | Foco concluído | 15 | 6 |
 | Tarefa concluída | 10, 10, 10, 5, 5, 5, depois 2 | — |
 
+### Moedas e loja
+
+A cada 10 XP o pet ganha 1 moeda (retroativo e também desfeito pelo "desfazer").
+Um dia bom rende ~15–18 moedas; o máximo fica em ~33.
+
+Cada item da loja tem **nível mínimo** e **preço crescente** (20 a 450 moedas), então o catálogo
+inteiro (~3.500 moedas) leva meses. Há 5 cenários (o céu muda com a hora do dia), 9 móveis em
+posições fixas (parede, tapete, chão esquerdo e direito), 9 fantasias (cabeça, rosto, pescoço)
+e 5 itens de **conquista**, que não se compram: 7 dias seguidos na meta de água, 50 alongamentos,
+30 focos, 100 tarefas e 100 litros de água.
+
 O pet nunca morre nem foge: com necessidades baixas ele só fica com sede, cansado ou triste.
 Fora do expediente ele dorme e os lembretes param.
 
@@ -56,4 +67,6 @@ js/breaks.js      pausas e lembretes js/bar.js     dados da barra (barra.v1)
 js/tasks.js       tarefas e notas   js/onboarding.js tutorial inicial
 js/music.js       seção Música      js/settings.js ajustes e backup
 js/player.js      núcleo do player  js/popup.js    janela destacada (player.html)
+js/shop.js        catálogo e loja   js/room.js     cenários e móveis
+js/costumes.js    fantasias
 ```

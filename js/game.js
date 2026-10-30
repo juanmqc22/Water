@@ -14,6 +14,9 @@ export const RULES = {
   tasks: [10, 10, 10, 5, 5, 5], taskRest: 2, // rende menos depois de muitas no dia
 };
 
+// Moedas: 1 a cada 10 XP. Vêm do XP, então também não dá para inflar.
+export const COIN_XP = 10;
+
 export const xpAt = (level) => 25 * (level - 1) ** 2;
 export const levelFor = (xp) => Math.floor(Math.sqrt(xp / 25)) + 1;
 export const stageFor = (level) => (level >= 10 ? 3 : level >= 5 ? 2 : 1);
@@ -69,10 +72,12 @@ export function compute({ now, water, b }) {
   let xp = 0;
   let todayXp = 0;
   let streak = 0;
+  let maxStreak = 0;
   for (let d = first < petStart ? first : petStart; d <= today; d = addDays(d, 1)) {
     const k = dayKey(d);
     if ((totals[k] ?? 0) >= goalFor(k)) streak++;
     else if (k !== todayKey) streak = 0;
+    maxStreak = Math.max(maxStreak, streak);
     if (d < petStart) continue;
     const gained = dayXp(k, days, streak);
     xp += gained;
@@ -80,8 +85,18 @@ export function compute({ now, water, b }) {
   }
 
   const level = levelFor(xp);
+  const sum = (o) => Object.values(o).reduce((a, n) => a + n, 0);
+  // Totais de sempre, usados pelas conquistas
+  const stats = {
+    maxStreak,
+    stretch: sum(days.stretch),
+    focus: sum(days.focus),
+    tasks: sum(days.tasks),
+    waterMl: sum(totals),
+  };
   return {
-    xp, todayXp, level, streak,
+    xp, todayXp, level, streak, stats,
+    coinsEarned: Math.floor(xp / COIN_XP),
     stage: stageFor(level),
     levelFrom: xpAt(level),
     levelTo: xpAt(level + 1),

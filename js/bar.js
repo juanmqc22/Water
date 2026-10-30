@@ -17,6 +17,7 @@ const DEFAULTS = {
     water: { on: true, every: 60 },
   },
   remState: {}, // { kind: { fired } }
+  shop: { owned: [], equipped: {} }, // owned: { id, price, at }; equipped: { slot: id }
   prefs: { workStart: 8, workEnd: 18, sound: true, notify: true },
   ui: { collapsed: {} },
 };

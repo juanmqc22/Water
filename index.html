@@ -24,23 +24,27 @@
       </div>
     </header>
 
-    <!-- Pet -->
+    <!-- Pet e casinha -->
     <section class="card pet-card">
-      <div class="pet-row">
+      <div class="room" id="room">
+        <div class="room-scene" id="room-scene"></div>
         <div class="pet-wrap" id="pet-wrap">
           <button class="pet" id="pet" aria-label="Pet"></button>
         </div>
-        <div class="pet-info">
-          <p class="pet-title"><b id="pet-name"></b> <span class="lvl" id="pet-level"></span></p>
-          <p class="muted small" id="pet-species"></p>
-          <div class="xpbar"><i id="xp-fill"></i></div>
-          <p class="muted tiny" id="xp-text"></p>
-          <div class="needs">
-            <div class="need" data-need="water" data-label="Hidratação"><span>💧</span><div class="meter"><i></i></div></div>
-            <div class="need" data-need="energy" data-label="Energia"><span>⚡</span><div class="meter"><i></i></div></div>
-            <div class="need" data-need="mood" data-label="Humor"><span>🙂</span><div class="meter"><i></i></div></div>
-          </div>
-        </div>
+        <button class="coins" id="open-shop" aria-label="Abrir loja">🪙 <b id="coins">0</b> <span>Loja</span></button>
+      </div>
+      <div class="pet-head">
+        <p class="pet-title"><b id="pet-name"></b> <span class="lvl" id="pet-level"></span></p>
+        <p class="muted small" id="pet-species"></p>
+      </div>
+      <div class="xp-row">
+        <div class="xpbar"><i id="xp-fill"></i></div>
+        <p class="muted tiny" id="xp-text"></p>
+      </div>
+      <div class="needs">
+        <div class="need" data-need="water" data-label="Hidratação"><span>💧 Água</span><div class="meter"><i></i></div></div>
+        <div class="need" data-need="energy" data-label="Energia"><span>⚡ Energia</span><div class="meter"><i></i></div></div>
+        <div class="need" data-need="mood" data-label="Humor"><span>🙂 Humor</span><div class="meter"><i></i></div></div>
       </div>
       <p class="streak small" id="streak"></p>
       <div class="balloon" id="balloon" hidden>
@@ -139,6 +143,17 @@
     <span id="toast-text"></span>
     <button id="toast-action"></button>
   </div>
+
+  <dialog class="sheet shop" id="shop">
+    <div class="sheet-head">
+      <h2>Loja</h2>
+      <span class="coin-total">🪙 <b id="shop-coins">0</b></span>
+      <button class="link bold" id="shop-close">OK</button>
+    </div>
+    <div class="shop-tabs" id="shop-tabs"></div>
+    <p class="muted small" id="shop-hint"></p>
+    <div class="shop-grid" id="shop-grid"></div>
+  </dialog>
 
   <dialog class="sheet onboard" id="onboard">
     <div class="ob-dots" id="ob-dots"></div>

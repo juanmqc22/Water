@@ -2,6 +2,8 @@ import * as bar from './bar.js';
 import { $, MIN, pick, hoursOf } from './util.js';
 import { compute } from './game.js';
 import { petSvg, speciesName } from './pet.js';
+import { roomSvg } from './room.js';
+import * as shop from './shop.js';
 import { setRefresher, say, balloonBusy, bindSections } from './ui.js';
 import * as water from './water.js';
 import * as breaks from './breaks.js';
@@ -13,6 +15,7 @@ import * as onboarding from './onboarding.js';
 const CHATTER_EVERY = 35 * MIN;
 
 let last = null; // último cálculo do jogo, para detectar ganhos de XP
+let lastAch = null;
 let lastChatter = Date.now();
 let rendering = null;
 let again = false;
@@ -39,6 +42,8 @@ async function render() {
 
     renderClock(ctx.now);
     renderPet(ctx);
+    renderRoom(ctx);
+    shop.renderShop(ctx);
     water.render(ctx);
     breaks.render(ctx);
     tasks.render(ctx);
@@ -65,9 +70,10 @@ function renderPet({ b, g }) {
   if (!b.pet) return;
   const mood = g.face === 'focus' || g.face === 'sleep' ? g.face : music.isPlaying() ? 'happy' : g.face;
   const el = $('#pet');
-  const key = `${b.pet.species}|${g.stage}|${mood}`;
+  const worn = shop.equipped(b);
+  const key = `${b.pet.species}|${g.stage}|${mood}|${worn.head}|${worn.face}|${worn.neck}`;
   if (el.dataset.key !== key) {
-    el.innerHTML = petSvg(b.pet.species, g.stage, mood);
+    el.innerHTML = petSvg(b.pet.species, g.stage, mood, worn);
     el.dataset.key = key;
   }
   el.classList.toggle('dance', music.isPlaying() && mood !== 'sleep');
@@ -87,7 +93,18 @@ function renderPet({ b, g }) {
     need.classList.toggle('low', v < 35);
     need.title = `${need.dataset.label}: ${v}%`;
   }
+  $('#coins').textContent = shop.coins(b, g);
   $('#streak').textContent = g.streak ? `🔥 ${g.streak} dia${g.streak > 1 ? 's' : ''} na meta de água` : '';
+}
+
+function renderRoom({ b, now }) {
+  const eq = shop.equipped(b);
+  const scene = $('#room-scene');
+  // O relógio de parede precisa redesenhar a cada minuto
+  const key = JSON.stringify(eq) + now.getHours() + (eq.wall === 'relogio' ? now.getMinutes() : '');
+  if (scene.dataset.key === key) return;
+  scene.dataset.key = key;
+  scene.innerHTML = roomSvg({ scene: eq.scene, items: eq, now });
 }
 
 function bump(text) {
@@ -112,8 +129,17 @@ function celebrate({ b, g }) {
     $('#pet').classList.add('evolve');
     setTimeout(() => $('#pet').classList.remove('evolve'), 1600);
   } else if (last && g.level > last.level) {
-    say(`Subi para o nível ${g.level}! 🎉`);
+    const news = shop.unlockedBetween(last.level, g.level);
+    say(`Subi para o nível ${g.level}! 🎉${news.length ? ` Novidade na loja: ${news.map((x) => x.name).join(', ')}.` : ''}`);
   }
+  const done = shop.achievementsDone(g);
+  if (lastAch) {
+    for (const id of done.filter((x) => !lastAch.includes(x))) {
+      const item = shop.CATALOG.find((x) => x.id === id);
+      say(`🏆 Conquista! Ganhei ${item.name}. Já está na loja para usar.`, { sticky: true, id: `ach-${id}`, actions: [{ label: 'Ver', primary: true, fn: shop.open }, { label: 'Depois' }] });
+    }
+  }
+  lastAch = done;
   if (last && g.streak > last.streak) say(`Meta de água batida! 🔥 ${g.streak} dia${g.streak > 1 ? 's' : ''} seguidos.`);
   last = g;
 }
@@ -166,6 +192,8 @@ async function init() {
   music.init();
   settings.init();
   onboarding.init();
+  shop.init();
+  $('#open-shop').onclick = shop.open;
   music.setOnPlayingChange(() => render());
   $('#open-settings').onclick = settings.open;
   $('#pet').onclick = petClick;

@@ -141,11 +141,26 @@ textarea { resize: vertical; line-height: 1.45; }
 
 /* Pet */
 
-.pet-card { display: grid; gap: 8px; }
-.pet-row { display: flex; gap: 10px; align-items: center; }
-.pet-wrap { position: relative; flex: none; }
-.pet { width: 104px; height: 104px; display: block; color: var(--text); border-radius: 16px; }
-.pet:hover { background: var(--fill); }
+.pet-card { display: grid; gap: 8px; padding: 8px 8px 12px; }
+
+/* Casinha: cenário grande, pet em pé no chão */
+.room { position: relative; aspect-ratio: 360 / 200; border-radius: 14px; overflow: hidden; background: #f4e7d4; }
+.room-scene, .room-scene svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pet-wrap { position: absolute; left: 50%; bottom: 7%; width: 36%; aspect-ratio: 1; transform: translateX(-50%); }
+.pet { width: 100%; height: 100%; display: block; color: #1d2433; border-radius: 50%; }
+.coins {
+  position: absolute; top: 8px; right: 8px;
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 99px;
+  background: rgba(255, 255, 255, 0.88); color: #1d2433; font-size: 13px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); backdrop-filter: blur(6px);
+}
+.coins b { font-variant-numeric: tabular-nums; }
+.coins span { font-weight: 600; color: #007aff; border-left: 1px solid rgba(0, 0, 0, 0.12); padding-left: 6px; }
+.coins:active { transform: scale(0.95); }
+.pet-head, .xp-row, .needs, .streak, .balloon { margin: 0 4px; }
+.pet-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.xp-row { display: grid; gap: 3px; }
 .pet svg { width: 100%; height: 100%; overflow: visible; }
 .pet-body { transform-origin: 50px 92px; animation: bob 3.2s ease-in-out infinite; }
 .pet.low .pet-body { animation-duration: 5s; }
@@ -175,21 +190,20 @@ textarea { resize: vertical; line-height: 1.45; }
 @keyframes floaty { 50% { transform: translateY(-3px); opacity: 0.6; } }
 
 .xp-float {
-  position: absolute; left: 50%; top: 8px; transform: translateX(-50%);
+  position: absolute; left: 50%; top: -6px; transform: translateX(-50%);
   font-weight: 800; font-size: 13px; color: var(--xp); pointer-events: none;
   animation: xp-up 1.4s ease-out forwards;
 }
 @keyframes xp-up { to { transform: translate(-50%, -28px); opacity: 0; } }
 
-.pet-info { flex: 1; min-width: 0; display: grid; gap: 3px; }
 .pet-title { font-size: 16px; display: flex; align-items: center; gap: 6px; }
 .pet-title b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lvl { font-size: 11px; font-weight: 700; color: #fff; background: var(--xp); padding: 1px 7px; border-radius: 99px; }
 .xpbar, .meter { height: 6px; border-radius: 3px; background: var(--fill); overflow: hidden; }
 .xpbar i, .meter i { display: block; height: 100%; border-radius: inherit; background: var(--xp); transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
-.needs { display: grid; gap: 4px; margin-top: 3px; }
-.need { display: flex; align-items: center; gap: 6px; font-size: 12px; }
-.need .meter { flex: 1; }
+.needs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.need { display: grid; gap: 4px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.need .meter { height: 7px; }
 .need[data-need="water"] i { background: var(--need-water); }
 .need[data-need="energy"] i { background: var(--need-energy); }
 .need[data-need="mood"] i { background: var(--need-mood); }
@@ -203,7 +217,7 @@ textarea { resize: vertical; line-height: 1.45; }
   display: grid; gap: 8px; animation: pop 0.25s ease-out;
 }
 .balloon::before {
-  content: ""; position: absolute; top: -7px; left: 44px;
+  content: ""; position: absolute; top: -7px; left: calc(50% - 7px);
   border: 7px solid transparent; border-top: 0; border-bottom-color: var(--fill);
 }
 .balloon p { line-height: 1.4; }
@@ -381,3 +395,34 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Loja */
+
+.shop { width: min(460px, calc(100% - 12px)); height: calc(100% - 12px); max-height: none; }
+.shop[open] { display: flex; flex-direction: column; gap: 10px; }
+.shop .sheet-head { gap: 10px; }
+.shop .sheet-head h2 { flex: 1; }
+.coin-total { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.shop-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 3px; border-radius: 10px; background: var(--fill); }
+.shop-tabs button { padding: 7px 2px; border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.shop-tabs button.on { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
+.shop-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; align-content: start; padding-bottom: 8px; }
+.shop-card {
+  display: grid; gap: 3px; justify-items: center; text-align: center;
+  padding: 8px 8px 10px; border-radius: 14px; background: var(--card);
+  border: 2px solid transparent; color: var(--text); font-size: 13px;
+}
+.shop-card.cat-scene { grid-column: 1 / -1; }
+.shop-prev { width: 100%; aspect-ratio: 1; display: grid; place-items: center; border-radius: 10px; background: var(--fill); overflow: hidden; }
+.shop-card.cat-scene .shop-prev { aspect-ratio: 360 / 200; }
+.shop-prev svg { width: 100%; height: 100%; display: block; color: #1d2433; }
+.cat-costume .shop-prev svg { width: 88%; height: 88%; }
+.shop-status { margin-top: 4px; padding: 4px 12px; border-radius: 99px; font-weight: 700; font-size: 12px; background: var(--fill); }
+.shop-card.buy .shop-status { background: var(--accent); color: #fff; }
+.shop-card.buy.short .shop-status { background: var(--fill); color: var(--muted); }
+.shop-card.owned .shop-status { color: var(--accent); }
+.shop-card.using { border-color: var(--tone-done); }
+.shop-card.using .shop-status { background: var(--tone-done); color: #fff; }
+.shop-card.locked { cursor: default; }
+.shop-card.locked .shop-prev svg { filter: grayscale(1) brightness(0.55) contrast(0.6); opacity: 0.55; }
+.shop-card.locked .shop-status { color: var(--muted); }

@@ -1,6 +1,8 @@
 // Pet: três linhas originais, três estágios cada, desenhadas em SVG.
 // O corpo muda com o estágio; o rosto muda com o humor.
 
+import { drawCostumes } from './costumes.js';
+
 export const SPECIES = {
   agua: { label: 'Água', names: ['Pingo', 'Ondi', 'Maremar'], body: '#5cb8ff', dark: '#2b7fd4', belly: '#d6efff' },
   planta: { label: 'Planta', names: ['Brotinho', 'Folhudo', 'Bosquel'], body: '#86d06f', dark: '#3f8f3a', belly: '#e2f6d6' },
@@ -145,7 +147,24 @@ function face(stage, mood) {
   }
 }
 
-export function petSvg(species, stage, mood = 'happy') {
+// Pontos de apoio das fantasias para cada espécie e estágio
+export function anchors(species, stage) {
+  const r = R[stage - 1];
+  const fs = [0.95, 1.05, 1.15][stage - 1];
+  const top = {
+    agua: CY - r - 14 - stage * 3 + 13,
+    planta: CY - r * 0.92 + 1,
+    fogo: CY - r * 0.95 + 1,
+  }[species] ?? CY - r;
+  return {
+    r, s: r / 22,
+    head: { x: 50, y: top },
+    face: { y: CY - 4, ex: 9 * fs, fs },
+    neck: { y: CY + r * 0.3, w: r * 0.93 },
+  };
+}
+
+export function petSvg(species, stage, mood = 'happy', worn = {}) {
   const c = SPECIES[species] ?? SPECIES.agua;
   const r = R[stage - 1];
   const zzz = mood === 'sleep'
@@ -153,7 +172,7 @@ export function petSvg(species, stage, mood = 'happy') {
     : '';
   return `<svg viewBox="0 0 100 100" aria-hidden="true">
     <ellipse class="shadow" cx="50" cy="${CY + r * 0.9 + 4}" rx="${r * 0.9}" ry="3.2" fill="currentColor" opacity=".12"/>
-    <g class="pet-body">${BODIES[species]?.(c, stage, r) ?? BODIES.agua(c, stage, r)}${face(stage, mood)}</g>
+    <g class="pet-body">${BODIES[species]?.(c, stage, r) ?? BODIES.agua(c, stage, r)}${face(stage, mood)}${drawCostumes(anchors(species, stage), worn)}</g>
     ${zzz}
   </svg>`;
 }
