@@ -2,7 +2,7 @@
 
 import * as store from './storage.js';
 import { $, esc, dayKey, startOfDay, addDays, clockTime, liters, amount, hoursOf } from './util.js';
-import { toast, refresh } from './ui.js';
+import { toast, refresh, dismiss } from './ui.js';
 import { paceFraction, lunchNow } from './game.js';
 
 export const GLASS_ML = 250;
@@ -29,6 +29,8 @@ export function mainBottle(w) {
 
 export async function record(ml, tagToken = null, source = 'manual') {
   const drink = await store.addDrink({ ml, tagToken, source });
+  // Bebeu: o pedido de água no balão perde o sentido
+  dismiss('water');
   await refresh();
   toast(`+${ml} ml`, 'Desfazer', async () => {
     await store.removeDrink(drink.id);
@@ -44,9 +46,9 @@ function statusFor(total, goal, s, now, bottleMl, frac, lunch) {
   if (lunch) return ['idle', 'Ritmo pausado no almoço'];
   const delta = total - goal * frac;
   if (delta >= bottleMl / 2) return ['ahead', `${amount(delta)} à frente`];
-  if (delta > -bottleMl / 2) return ['ok', 'No ritmo'];
-  const n = Math.ceil(-delta / bottleMl);
-  return ['behind', `${n} garrafa${n > 1 ? 's' : ''} atrás`];
+  // Mesma régua do lembrete do pet: atrasado a partir de um copo
+  if (delta > -GLASS_ML) return ['ok', 'No ritmo'];
+  return ['behind', `${amount(-delta)} atrás`];
 }
 
 export function init() {

@@ -12,6 +12,7 @@ const SNOOZE_MIN = 10;
 // Água: só lembra quando estiver um copo atrás do ritmo, sem insistir
 const WATER = { gap: 30, afterDrink: 20 };
 const LUNCH_SNOOZE_MIN = 15;
+const LUNCH_WINDOW_MIN = 120;
 // Não cobra o tempo antes de a barra ser aberta (evita uma rajada de lembretes)
 const OPENED_AT = Date.now();
 
@@ -177,7 +178,9 @@ function lunchDue({ now, b }) {
   if (st.day === today) return false;
   if (st.snoozeUntil && st.snoozeUntil > now) return false;
   const [h, m] = b.prefs.lunchAt.split(':').map(Number);
-  return now >= atHour(now, h + m / 60);
+  const at = atHour(now, h + m / 60).getTime();
+  // Depois de 2 h do horário não faz mais sentido chamar para o almoço
+  return now >= at && now - at < LUNCH_WINDOW_MIN * MIN;
 }
 
 // Chamado a cada ciclo: dispara lembretes vencidos e fecha sessões de foco
@@ -198,8 +201,10 @@ export function tick(ctx) {
   for (const kind of ['stretch', 'eyes']) {
     if (b.reminders[kind].on && now >= dueAt(kind, ctx)) fireBreak(kind, ctx);
   }
+  const deficit = waterDeficit(g);
+  // Voltou ao ritmo (bebeu por outro caminho): tira o pedido antigo do balão
+  if (deficit < GLASS_ML) dismiss('water');
   if (b.reminders.water.on) {
-    const deficit = waterDeficit(g);
     const calm = now - Math.max(b.remState.water?.fired ?? 0, OPENED_AT) >= WATER.gap * MIN;
     if (deficit >= GLASS_ML && calm && now - lastDrink(ctx) >= WATER.afterDrink * MIN) fireWater(ctx, deficit);
   }
