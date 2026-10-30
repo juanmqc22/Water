@@ -1,46 +1,57 @@
-# Água
+# Barra
 
-Contador de água diário, minimalista, acionado por chip NFC na garrafa.
+Barra lateral de trabalho com um pet que cresce com seus hábitos: água, pausas e tarefas.
+Feita para ficar fixa na barra lateral do Edge (≈ 385 px), sem instalar nada.
 
-**V1:** site estático no GitHub Pages, dados no `localStorage` do Safari.
-**V2 (futuro):** Supabase + Vercel, multiusuário. Só `js/storage.js` precisa ser reimplementado.
+Site estático no GitHub Pages: `https://juanmqc22.github.io/Water/`.
+Os dados ficam no `localStorage` do navegador. O histórico do antigo app Água (chave `water.v1`) é reaproveitado.
 
 ## Funcionalidades
 
-- Leitura do chip NFC (`?tag=<token>`) registra a garrafa, com **Desfazer**
-- Anti-duplicado: ignora a mesma garrafa lida de novo em menos de N minutos
-- Anel de progresso com **marcador de ritmo** (onde você deveria estar agora)
-- Semana em mini-anéis: dias na meta e média diária
-- Meta sugerida pelo peso (35 ml/kg) e botão **Treinei hoje** (+500 ml)
-- Registro manual (garrafa ou copo de 250 ml)
-- Exportar/importar backup em JSON
+- **Pet:** 3 espécies originais (Água, Planta, Fogo), cada uma com 3 estágios (evolui nos níveis 5 e 10).
+  Mostra hidratação, energia e humor, reage ao que você faz e avisa os lembretes num balão.
+- **Água:** anel de progresso com marcador de ritmo, garrafa, copo, treino (+500 ml), semana e desfazer.
+  Os links de garrafa (`?tag=<token>`) continuam funcionando.
+- **Pausas:** alongar e descansar a vista, com lembretes, adiar 10 min e modo foco (25/50 min).
+- **Tarefas e notas:** lista do dia e um bloco de notas que salva sozinho.
+- **Música:** player do YouTube embutido, com links e playlists salvos.
+- **Agenda:** compromissos digitados à mão, com aviso 5 min antes.
+- Som e notificação do Windows (quando a barra não está em foco). Backup em JSON.
 
-## Configuração
+## Gamificação
 
-1. **GitHub Pages:** Settings → Pages → Deploy from a branch → escolha o branch e `/ (root)`.
-   O app fica em `https://juanmqc22.github.io/Water/`.
-2. **Garrafa:** abra o app no **Safari** → Ajustes → Adicionar garrafa → Copiar URL.
-3. **Chip NFC:** no app *NFC Tools* → Escrever → Adicionar registro → URL → cole → grave.
-   Depois, em Outros → Bloquear tag (deixa o chip somente leitura; é irreversível).
-4. **Atalho (registro sem toque extra):** app Atalhos → Automação → Nova → NFC → escaneie o chip →
-   ação **Abrir URLs** com a URL da garrafa → marque **Executar Imediatamente**.
+O XP é calculado a partir dos registros reais, então desfazer também desfaz o XP.
 
-> Use o app pelo Safari (aba fixa ou favorito), **não** adicione à Tela de Início:
-> no iPhone o webapp da Tela de Início tem armazenamento separado do Safari, e o NFC sempre abre no Safari.
+| Ação | XP | Limite por dia |
+|---|---|---|
+| Água | 1 a cada 50 ml | até a meta |
+| Meta de água batida | 20 + 2 por dia de sequência | sequência conta até +20 |
+| Alongar | 10 | 8 (mín. 15 min entre elas) |
+| Descansar a vista | 3 | 10 (mín. 10 min entre elas) |
+| Foco concluído | 15 | 6 |
+| Tarefa concluída | 10, 10, 10, 5, 5, 5, depois 2 | — |
 
-> Garrafa de metal exige tag NFC **anti-metal (on-metal)**.
+O pet nunca morre nem foge: com necessidades baixas ele só fica com sede, cansado ou triste.
+Fora do expediente ele dorme e os lembretes param.
+
+## Uso no Edge
+
+1. Abra o site numa aba normal.
+2. Na barra lateral do Edge, clique em **+** e escolha adicionar a página atual.
+
+Alternativa: menu **⋯ → Aplicativos → Instalar este site como aplicativo** e encoste a janela à direita.
 
 ## Estrutura
 
 ```
-index.html        tela única + sheets (registrar, ajustes)
-css/style.css     visual estilo iOS, claro/escuro
-js/storage.js     camada de dados (único ponto a trocar na V2)
-js/app.js         lógica de tela
-```
-
-## Rodar localmente
-
-```bash
-python3 -m http.server 8000
+index.html        página única
+css/style.css     visual, claro/escuro
+js/app.js         inicialização, ciclo de renderização, pet na tela
+js/game.js        regras de XP, nível, estágio e necessidades
+js/pet.js         desenho dos pets (SVG)
+js/ui.js          toast, balão, som, notificação, seções
+js/water.js       seção Água        js/storage.js  dados da água (water.v1)
+js/breaks.js      pausas e lembretes js/bar.js     dados da barra (barra.v1)
+js/tasks.js       tarefas e notas   js/agenda.js   agenda
+js/music.js       YouTube           js/settings.js ajustes e backup
 ```
