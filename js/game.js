@@ -14,11 +14,15 @@ export const RULES = {
   tasks: [10, 10, 10, 5, 5, 5], taskRest: 2, // rende menos depois de muitas no dia
 };
 
-// Moedas: 1 a cada 4 XP. Vêm do XP, então também não dá para inflar.
-export const COIN_XP = 4;
+// Moedas: 1 a cada 2 XP. Vêm do XP, então também não dá para inflar.
+export const COIN_XP = 2;
 
-export const xpAt = (level) => 25 * (level - 1) ** 2;
-export const levelFor = (xp) => Math.floor(Math.sqrt(xp / 25)) + 1;
+// Curva de nível: o nível N pede LEVEL_K × (N−1)² XP. Com ~250 XP/dia:
+// nível 5 no 1º dia, 10 em ~5 dias, catálogo inteiro em ~10 dias.
+const LEVEL_K = 14;
+
+export const xpAt = (level) => LEVEL_K * (level - 1) ** 2;
+export const levelFor = (xp) => Math.floor(Math.sqrt(xp / LEVEL_K)) + 1;
 export const stageFor = (level) => (level >= 10 ? 3 : level >= 5 ? 2 : 1);
 
 export function waterTotals(drinks) {

@@ -1,6 +1,6 @@
 // Loja: catálogo, moedas, compra, equipar e conquistas.
 // Duas travas seguram o ritmo: o nível mínimo de cada item e o preço crescente.
-// Calibrado para liberar e comprar tudo em ~1 mês de uso bom (~150 XP/dia).
+// Calibrado para liberar e comprar tudo em ~10–16 dias de uso (150–250 XP/dia).
 
 import * as bar from './bar.js';
 import { $, esc } from './util.js';
