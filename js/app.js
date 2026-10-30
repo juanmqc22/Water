@@ -1,14 +1,14 @@
 import * as bar from './bar.js';
-import { $, esc, MIN, pick, hoursOf } from './util.js';
+import { $, MIN, pick, hoursOf } from './util.js';
 import { compute } from './game.js';
-import { petSvg, speciesName, SPECIES } from './pet.js';
+import { petSvg, speciesName } from './pet.js';
 import { setRefresher, say, balloonBusy, bindSections } from './ui.js';
 import * as water from './water.js';
 import * as breaks from './breaks.js';
 import * as tasks from './tasks.js';
-import * as agenda from './agenda.js';
 import * as music from './music.js';
 import * as settings from './settings.js';
+import * as onboarding from './onboarding.js';
 
 const CHATTER_EVERY = 35 * MIN;
 
@@ -34,7 +34,6 @@ async function render() {
   rendering = (async () => {
     let ctx = await buildCtx();
     const changed = breaks.tick(ctx);
-    agenda.tick(ctx);
     if (changed) ctx = await buildCtx();
     ctx = { ...ctx, b: bar.load() };
 
@@ -43,7 +42,6 @@ async function render() {
     water.render(ctx);
     breaks.render(ctx);
     tasks.render(ctx);
-    agenda.render(ctx);
     music.render(ctx);
     celebrate(ctx);
     chatter(ctx);
@@ -158,35 +156,6 @@ function petClick() {
   say(pick(tips));
 }
 
-// Escolha do pet na primeira vez
-
-function openStarter() {
-  const dlg = $('#starter');
-  let chosen = 'agua';
-  const grid = $('#st-grid');
-  grid.innerHTML = Object.entries(SPECIES).map(([k, v]) => `
-    <button class="st-card ${k === chosen ? 'on' : ''}" data-species="${k}">
-      ${petSvg(k, 1, 'happy')}<b>${esc(v.names[0])}</b><span class="muted">${v.label}</span>
-    </button>`).join('');
-  grid.onclick = (e) => {
-    const card = e.target.closest('[data-species]');
-    if (!card) return;
-    chosen = card.dataset.species;
-    grid.querySelectorAll('.st-card').forEach((c) => c.classList.toggle('on', c === card));
-    if (!$('#st-name').dataset.touched) $('#st-name').value = SPECIES[chosen].names[0];
-  };
-  $('#st-name').value = SPECIES[chosen].names[0];
-  $('#st-name').oninput = (e) => { e.target.dataset.touched = '1'; };
-  $('#st-ok').onclick = () => {
-    const name = $('#st-name').value.trim() || SPECIES[chosen].names[0];
-    bar.update((d) => { d.pet = { species: chosen, name, createdAt: new Date().toISOString() }; });
-    dlg.close();
-    render().then(() => say(`Oi! Eu sou ${name}. Água, pausas e tarefas me fazem crescer. Vamos juntos! 💙`));
-  };
-  dlg.addEventListener('cancel', (e) => e.preventDefault());
-  dlg.showModal();
-}
-
 async function init() {
   navigator.storage?.persist?.();
   setRefresher(render);
@@ -194,9 +163,9 @@ async function init() {
   water.init();
   breaks.init();
   tasks.init();
-  agenda.init();
   music.init();
   settings.init();
+  onboarding.init();
   music.setOnPlayingChange(() => render());
   $('#open-settings').onclick = settings.open;
   $('#pet').onclick = petClick;
@@ -204,7 +173,9 @@ async function init() {
   await water.handleTagLink();
   await render();
   const b = bar.load();
-  if (!b.pet) openStarter();
+  if (!b.pet) {
+    onboarding.open((name) => say(`Oi! Eu sou ${name}. Bora cuidar de você hoje? 💙`));
+  }
   else greet(b, last);
 
   setInterval(render, 20000);

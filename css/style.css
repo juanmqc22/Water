@@ -95,10 +95,6 @@ textarea { resize: vertical; line-height: 1.45; }
 .clock { font-family: var(--rounded); font-size: 30px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
 .date { font-size: 12px; font-weight: 600; color: var(--muted); }
 .top-right { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.next-event {
-  font-size: 12px; font-weight: 600; color: var(--accent);
-  max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
 .icon-btn {
   width: 34px; height: 34px; border-radius: 50%; flex: none;
   background: var(--card); color: var(--accent);
@@ -300,15 +296,6 @@ textarea { resize: vertical; line-height: 1.45; }
 .m-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rename { color: var(--muted); font-size: 12px; width: 22px; }
 
-/* Agenda */
-
-.a-form { display: grid; gap: 6px; }
-.a-form .btn-row input { flex: 1.2; min-width: 0; padding: 6px; }
-.a-form .btn-row .btn { flex: 1; }
-.agenda .a-when { font-size: 12px; white-space: nowrap; }
-.agenda .a-title { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.agenda li.past { opacity: 0.45; }
-
 /* Toast */
 
 .toast {
@@ -366,6 +353,26 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
 .st-card svg { width: 76px; height: 76px; }
 .st-card.on { border-color: var(--accent); }
 .st-card span { font-size: 11px; }
+
+/* Tutorial */
+
+.onboard { width: min(400px, calc(100% - 16px)); }
+.onboard[open] { display: flex; flex-direction: column; gap: 10px; }
+.ob-dots { display: flex; justify-content: center; gap: 6px; }
+.ob-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--fill); transition: width 0.2s; }
+.ob-dots i.done { background: var(--accent); opacity: 0.45; }
+.ob-dots i.on { background: var(--accent); width: 20px; border-radius: 4px; }
+.ob-body { display: grid; gap: 10px; line-height: 1.45; overflow-y: auto; }
+.ob-body h2 { font-size: 19px; }
+.ob-hero { display: grid; place-items: center; }
+.ob-hero svg { width: 96px; height: 96px; }
+.ob-list { display: grid; gap: 4px; padding-left: 2px; }
+.ob-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ob-hint { font-weight: 600; color: var(--accent); font-size: 13px; }
+.ob-error { color: var(--danger); font-size: 13px; font-weight: 600; min-height: 1em; }
+.ob-error:empty { display: none; }
+.ob-nav { display: flex; justify-content: space-between; gap: 8px; }
+.ob-nav .btn { min-width: 110px; min-height: 38px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

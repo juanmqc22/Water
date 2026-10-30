@@ -15,7 +15,6 @@ Os dados ficam no `localStorage` do navegador. O histórico do antigo app Água 
 - **Pausas:** alongar e descansar a vista, com lembretes, adiar 10 min e modo foco (25/50 min).
 - **Tarefas e notas:** lista do dia e um bloco de notas que salva sozinho.
 - **Música:** player do YouTube embutido, com links e playlists salvos.
-- **Agenda:** compromissos digitados à mão, com aviso 5 min antes.
 - Som e notificação do Windows (quando a barra não está em foco). Backup em JSON.
 
 ## Gamificação
@@ -52,6 +51,6 @@ js/pet.js         desenho dos pets (SVG)
 js/ui.js          toast, balão, som, notificação, seções
 js/water.js       seção Água        js/storage.js  dados da água (water.v1)
 js/breaks.js      pausas e lembretes js/bar.js     dados da barra (barra.v1)
-js/tasks.js       tarefas e notas   js/agenda.js   agenda
+js/tasks.js       tarefas e notas   js/onboarding.js tutorial inicial
 js/music.js       YouTube           js/settings.js ajustes e backup
 ```

@@ -18,7 +18,6 @@
         <p class="date" id="date"></p>
       </div>
       <div class="top-right">
-        <p class="next-event" id="next-event"></p>
         <button class="icon-btn" id="open-settings" aria-label="Ajustes">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.5" fill="var(--card)"/><circle cx="15" cy="17" r="2.5" fill="var(--card)"/></svg>
         </button>
@@ -119,21 +118,6 @@
       </div>
     </section>
 
-    <!-- Agenda -->
-    <section class="sec" data-sec="agenda">
-      <button class="sec-toggle"><span class="sec-title">📅 Agenda</span><span class="sec-meta" id="agenda-meta"></span><i class="chev"></i></button>
-      <div class="sec-body">
-        <form id="a-form" class="a-form">
-          <input id="a-title" placeholder="Compromisso…" autocomplete="off">
-          <div class="btn-row">
-            <input id="a-date" type="date" aria-label="Data">
-            <input id="a-time" type="time" aria-label="Hora">
-            <button class="btn primary">Adicionar</button>
-          </div>
-        </form>
-        <ul class="mini-list agenda" id="a-list"></ul>
-      </div>
-    </section>
 
     <!-- Notas -->
     <section class="sec" data-sec="notes">
@@ -149,12 +133,14 @@
     <button id="toast-action"></button>
   </div>
 
-  <dialog class="sheet" id="starter">
-    <h2>Escolha seu parceiro</h2>
-    <p class="muted small">Ele cresce com você: água, pausas e tarefas dão XP. No nível 5 e no 10, ele evolui.</p>
-    <div class="st-grid" id="st-grid"></div>
-    <label class="field-col">Nome<input id="st-name" maxlength="20"></label>
-    <button class="btn primary wide" id="st-ok">Começar</button>
+  <dialog class="sheet onboard" id="onboard">
+    <div class="ob-dots" id="ob-dots"></div>
+    <div class="ob-body" id="ob-body"></div>
+    <p class="ob-error" id="ob-error" role="alert"></p>
+    <div class="ob-nav">
+      <button class="btn" id="ob-back">Voltar</button>
+      <button class="btn primary" id="ob-next">Próximo</button>
+    </div>
   </dialog>
 
   <dialog class="sheet" id="settings">
@@ -162,6 +148,8 @@
       <h2>Ajustes</h2>
       <button class="link bold" id="s-close">OK</button>
     </div>
+
+    <button class="btn wide" id="s-tutorial">Rever tutorial de configuração</button>
 
     <p class="group-title">Pet</p>
     <div class="group">

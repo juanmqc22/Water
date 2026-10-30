@@ -43,7 +43,7 @@ export function say(text, { actions = [], sticky = false, urgent = false, id = n
     if (i >= 0) queue.splice(i, 1);
     if (current?.id === id) return show(msg);
   }
-  // Urgente (agenda, fim do foco) passa na frente; o lembrete atual volta para a fila
+  // Urgente (fim do foco) passa na frente; o lembrete atual volta para a fila
   if (urgent && current?.sticky) {
     queue.unshift(current);
     return show(msg);

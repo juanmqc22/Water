@@ -5,6 +5,7 @@ import * as store from './storage.js';
 import { $, esc, dayKey, liters } from './util.js';
 import { toast, refresh, chime, notify } from './ui.js';
 import { SPECIES } from './pet.js';
+import * as onboarding from './onboarding.js';
 
 const suggestedGoal = (kg) => Math.round((kg * 35) / 50) * 50;
 
@@ -70,6 +71,10 @@ function check(sel, apply) {
 export function init() {
   $('#settings').addEventListener('click', (e) => { if (e.target === $('#settings')) $('#settings').close(); });
   $('#s-close').onclick = () => $('#settings').close();
+  $('#s-tutorial').onclick = () => {
+    $('#settings').close();
+    onboarding.open();
+  };
 
   $('#s-pet-name').addEventListener('change', (e) => {
     const name = e.target.value.trim();

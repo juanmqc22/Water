@@ -1,4 +1,4 @@
-// Dados da barra (pet, tarefas, pausas, agenda, música, preferências).
+// Dados da barra (pet, tarefas, pausas, música, preferências).
 // A água continua em storage.js, com a chave antiga, para manter o histórico.
 
 const KEY = 'barra.v1';
@@ -10,7 +10,6 @@ const DEFAULTS = {
   notes: '',
   breaks: [], // { at, kind: 'stretch' | 'eyes' } — só pausas que contaram
   focus: [], // { start, end, done }
-  events: [], // { id, date: 'YYYY-MM-DD', time: 'HH:MM', title, warned }
   music: { items: [], current: null, volume: 60 }, // item: { id, kind, ref, title }
   reminders: {
     stretch: { on: true, every: 60 },
