@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Barra · teste</title>
+  <link rel="icon" href="../icon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f2f2f7; --card: #fff; --text: #000; --muted: #8a8a8e;
+      --sep: rgba(60, 60, 67, 0.13); --accent: #007aff;
+      --ok: #28b44c; --warn: #f08c00; --bad: #ff3b30;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000; --card: #1c1c1e; --text: #fff; --muted: #8d8d93;
+        --sep: rgba(84, 84, 88, 0.55); --accent: #0a84ff;
+        --ok: #4cd964; --warn: #ffb340; --bad: #ff453a;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+      font-size: 14px; background: var(--bg); color: var(--text);
+      padding: 12px; display: grid; gap: 10px;
+    }
+    h1 { font-size: 18px; }
+    .card { background: var(--card); border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; }
+    .row { display: flex; align-items: center; gap: 8px; }
+    .row > span:first-child { flex: 1; }
+    .st { font-weight: 600; font-size: 12px; padding: 2px 8px; border-radius: 99px; background: var(--sep); }
+    .st.ok { color: var(--ok); } .st.warn { color: var(--warn); } .st.bad { color: var(--bad); }
+    .muted { color: var(--muted); font-size: 12px; }
+    button, input { font: inherit; color: inherit; }
+    button {
+      border: 0; border-radius: 8px; padding: 6px 10px; cursor: pointer;
+      background: var(--accent); color: #fff;
+    }
+    input { width: 100%; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--sep); background: var(--bg); }
+    #player-wrap { aspect-ratio: 16 / 9; background: #000; border-radius: 8px; overflow: hidden; }
+    #player-wrap iframe { width: 100%; height: 100%; }
+    pre { white-space: pre-wrap; font-size: 11px; background: var(--bg); padding: 8px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Teste de viabilidade</h1>
+  <p class="muted">Abra esta página na barra lateral do Edge, rode os testes e copie o resumo no final.</p>
+
+  <section class="card">
+    <div class="row"><span>Página carregou</span><b class="st ok">ok</b></div>
+    <div class="row"><span>Largura da tela</span><b class="st" id="width">–</b></div>
+    <div class="row"><span>localStorage</span><b class="st" id="ls">–</b></div>
+    <div class="row"><span>Dados do app Água</span><b class="st" id="water">–</b></div>
+  </section>
+
+  <section class="card">
+    <div class="row"><span>YouTube (API)</span><b class="st" id="yt-api">carregando…</b></div>
+    <div class="row"><span>YouTube (reprodução)</span><b class="st" id="yt-play">–</b></div>
+    <div id="player-wrap"><div id="player"></div></div>
+    <input id="yt-url" placeholder="Cole um link de vídeo ou playlist do YouTube">
+    <div class="row"><button id="yt-load">Carregar link</button><button id="yt-toggle">Play / pause</button></div>
+  </section>
+
+  <section class="card">
+    <div class="row"><span>Notificações</span><b class="st" id="notif">–</b></div>
+    <div class="row"><span>Som (bipe)</span><b class="st" id="beep">–</b></div>
+    <div class="row"><button id="notif-test">Testar notificação</button><button id="beep-test">Testar som</button></div>
+  </section>
+
+  <section class="card">
+    <div class="row"><span>Timer em segundo plano</span><b class="st" id="timer">–</b></div>
+    <p class="muted">Deixe a barra aberta e use outras janelas por alguns minutos. Se o atraso ficar alto, os lembretes vão atrasar.</p>
+  </section>
+
+  <section class="card">
+    <div class="row"><span>Resumo</span><button id="copy">Copiar</button></div>
+    <pre id="summary"></pre>
+  </section>
+
+  <script>
+    const results = {};
+    const $ = (id) => document.getElementById(id);
+    function set(id, text, tone) {
+      const el = $(id);
+      el.textContent = text;
+      el.className = 'st' + (tone ? ' ' + tone : '');
+      results[id] = text;
+      $('summary').textContent = [
+        'origem: ' + location.origin + location.pathname,
+        'navegador: ' + navigator.userAgent,
+        ...Object.entries(results).map(([k, v]) => k + ': ' + v),
+      ].join('\n');
+    }
+
+    // Tela
+    const showWidth = () => set('width', innerWidth + ' px');
+    addEventListener('resize', showWidth);
+    showWidth();
+
+    // Armazenamento e dados existentes do app Água (mesma origem)
+    try {
+      localStorage.setItem('barra.teste', '1');
+      localStorage.removeItem('barra.teste');
+      set('ls', 'ok', 'ok');
+      const water = JSON.parse(localStorage.getItem('water.v1') || 'null');
+      set('water', water ? water.drinks.length + ' registros' : 'nenhum', water ? 'ok' : 'warn');
+    } catch (e) {
+      set('ls', 'bloqueado', 'bad');
+      set('water', 'sem acesso', 'bad');
+    }
+
+    // YouTube
+    let player;
+    const YT_ERRORS = { 2: 'link inválido', 5: 'erro HTML5', 100: 'vídeo não encontrado', 101: 'embed proibido', 150: 'embed proibido' };
+    const apiTimeout = setTimeout(() => set('yt-api', 'bloqueado (timeout)', 'bad'), 10000);
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    tag.onerror = () => { clearTimeout(apiTimeout); set('yt-api', 'bloqueado', 'bad'); };
+    document.head.appendChild(tag);
+
+    window.onYouTubeIframeAPIReady = () => {
+      clearTimeout(apiTimeout);
+      set('yt-api', 'ok', 'ok');
+      player = new YT.Player('player', {
+        videoId: 'jfKfPfyJRdk', // rádio lo-fi ao vivo, permite embed
+        playerVars: { playsinline: 1, rel: 0 },
+        events: {
+          onReady: () => set('yt-play', 'pronto, aperte play', 'warn'),
+          onStateChange: (e) => {
+            if (e.data === YT.PlayerState.PLAYING) set('yt-play', 'tocando', 'ok');
+          },
+          onError: (e) => set('yt-play', YT_ERRORS[e.data] || 'erro ' + e.data, 'bad'),
+        },
+      });
+    };
+
+    function parseYouTube(url) {
+      try {
+        const u = new URL(url);
+        const list = u.searchParams.get('list');
+        const id = u.hostname === 'youtu.be' ? u.pathname.slice(1) : u.searchParams.get('v');
+        return { list, id };
+      } catch { return {}; }
+    }
+    $('yt-load').onclick = () => {
+      if (!player) return;
+      const { list, id } = parseYouTube($('yt-url').value.trim());
+      if (list) player.loadPlaylist({ list, listType: 'playlist' });
+      else if (id) player.loadVideoById(id);
+      else set('yt-play', 'link não reconhecido', 'bad');
+    };
+    $('yt-toggle').onclick = () => {
+      if (!player) return;
+      player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo();
+    };
+
+    // Notificações
+    const notifState = () => {
+      if (!('Notification' in window)) return set('notif', 'não suportado', 'bad');
+      const p = Notification.permission;
+      set('notif', p === 'granted' ? 'permitido' : p === 'denied' ? 'negado' : 'não perguntado', p === 'granted' ? 'ok' : p === 'denied' ? 'bad' : 'warn');
+    };
+    notifState();
+    $('notif-test').onclick = async () => {
+      if (!('Notification' in window)) return;
+      await Notification.requestPermission();
+      notifState();
+      if (Notification.permission === 'granted') new Notification('Hora de beber água 💧', { body: 'Teste da barra' });
+    };
+
+    // Som
+    $('beep-test').onclick = () => {
+      try {
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.4);
+        set('beep', 'tocou (ouviu?)', 'ok');
+      } catch {
+        set('beep', 'falhou', 'bad');
+      }
+    };
+
+    // Timer: mede o maior atraso entre ticks de 5 s
+    let last = Date.now(), worst = 0;
+    set('timer', 'medindo…');
+    setInterval(() => {
+      const now = Date.now();
+      worst = Math.max(worst, now - last - 5000);
+      last = now;
+      const s = Math.round(worst / 1000);
+      set('timer', 'maior atraso ' + s + ' s', s <= 5 ? 'ok' : s <= 60 ? 'warn' : 'bad');
+    }, 5000);
+  </script>
+</body>
+</html>
