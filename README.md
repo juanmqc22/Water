@@ -14,7 +14,9 @@ Os dados ficam no `localStorage` do navegador. O histórico do antigo app Água 
   Os links de garrafa (`?tag=<token>`) continuam funcionando.
 - **Pausas:** alongar e descansar a vista, com lembretes, adiar 10 min e modo foco (25/50 min).
 - **Tarefas e notas:** lista do dia e um bloco de notas que salva sozinho.
-- **Música:** player do YouTube embutido, com links e playlists salvos.
+- **Música:** player do YouTube com links e playlists salvos. O botão **Destacar ↗** abre o player numa janela
+  separada, que continua tocando com a barra lateral fechada (o Edge pausa a mídia do painel ao fechar).
+  Os controles da barra comandam a janela.
 - Som e notificação do Windows (quando a barra não está em foco). Backup em JSON.
 
 ## Gamificação
@@ -52,5 +54,6 @@ js/ui.js          toast, balão, som, notificação, seções
 js/water.js       seção Água        js/storage.js  dados da água (water.v1)
 js/breaks.js      pausas e lembretes js/bar.js     dados da barra (barra.v1)
 js/tasks.js       tarefas e notas   js/onboarding.js tutorial inicial
-js/music.js       YouTube           js/settings.js ajustes e backup
+js/music.js       seção Música      js/settings.js ajustes e backup
+js/player.js      núcleo do player  js/popup.js    janela destacada (player.html)
 ```

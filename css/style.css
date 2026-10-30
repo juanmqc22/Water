@@ -288,7 +288,11 @@ textarea { resize: vertical; line-height: 1.45; }
 #music-sec.playing .m-now { color: var(--text); }
 .player { aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: #000; }
 .player iframe { width: 100%; height: 100%; display: block; }
-.volume { display: flex; align-items: center; gap: 8px; }
+.volume { flex: 1; display: flex; align-items: center; gap: 8px; }
+.volume-row { display: flex; align-items: center; gap: 12px; }
+.detached-note { display: none; gap: 6px; padding: 10px; border-radius: 10px; background: var(--fill); font-size: 12px; line-height: 1.4; }
+#music-sec.detached .detached-note { display: grid; }
+#music-sec.detached .player, #music-sec.detached #m-detach { display: none; }
 .volume input { padding: 0; border: 0; accent-color: var(--accent); }
 .music-list li { cursor: pointer; }
 .music-list li.active .m-title { color: var(--accent); font-weight: 600; }

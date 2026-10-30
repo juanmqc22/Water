@@ -1,23 +1,24 @@
-// Seção Música: player do YouTube embutido e lista de links salvos.
+// Seção Música. O player toca embutido na barra ou numa janela destacada
+// (que continua tocando com a barra lateral fechada). Nos dois casos os
+// controles daqui funcionam: a janela recebe os comandos pelo BroadcastChannel.
 
 import * as bar from './bar.js';
 import { $, esc } from './util.js';
 import { toast, say, refresh } from './ui.js';
+import { createPlayer, currentItem, findItem, CHANNEL, ERRORS } from './player.js';
 
-let player = null;
+const channel = new BroadcastChannel(CHANNEL);
+const send = (msg) => channel.postMessage(msg);
+
+let local = null; // player embutido
+let detached = false; // a janela destacada está aberta
+let handoff = null; // posição a passar para a janela quando ela abrir
 let playing = false;
+let title = '';
 let onPlayingChange = () => {};
 
 export const isPlaying = () => playing;
 export const setOnPlayingChange = (fn) => { onPlayingChange = fn; };
-
-const ERRORS = {
-  2: 'Link inválido.',
-  5: 'O player não conseguiu tocar este vídeo.',
-  100: 'Vídeo não encontrado ou privado.',
-  101: 'Este vídeo não permite tocar fora do YouTube.',
-  150: 'Este vídeo não permite tocar fora do YouTube.',
-};
 
 // Aceita watch?v=, youtu.be, shorts, embed, live, playlist e music.youtube.com
 export function parseYouTube(text) {
@@ -32,95 +33,93 @@ export function parseYouTube(text) {
   return id ? { kind: 'video', ref: id.slice(0, 11) } : null;
 }
 
-const current = (b = bar.load()) => b.music.items.find((x) => x.id === b.music.current) ?? null;
-
-function load(item, autoplay = true) {
-  if (!player?.loadVideoById) return;
-  bar.update((d) => { d.music.current = item.id; });
-  if (item.kind === 'playlist') {
-    const opts = { list: item.ref, listType: 'playlist' };
-    autoplay ? player.loadPlaylist(opts) : player.cuePlaylist(opts);
-  } else {
-    autoplay ? player.loadVideoById(item.ref) : player.cueVideoById(item.ref);
-  }
-  refresh();
-}
-
-function step(dir) {
-  const b = bar.load();
-  const item = current(b);
-  if (item?.kind === 'playlist' && player) return dir > 0 ? player.nextVideo() : player.previousVideo();
-  const items = b.music.items;
-  if (!items.length) return;
-  const i = items.findIndex((x) => x.id === item?.id);
-  load(items[(i + dir + items.length) % items.length]);
-}
-
-function toggle() {
-  if (!player?.getPlayerState) return;
-  const item = current();
-  if (!item) {
-    const first = bar.load().music.items[0];
-    if (first) load(first);
-    else toast('Adicione um link do YouTube primeiro');
-    return;
-  }
-  playing ? player.pauseVideo() : player.playVideo();
-}
-
-function onState(e) {
+function setState(isOn, newTitle) {
   const was = playing;
-  playing = e.data === YT.PlayerState.PLAYING;
-  if (playing) {
-    const title = player.getVideoData?.().title;
-    if (title) {
-      $('#m-now').textContent = title;
-      bar.update((d) => {
-        const it = d.music.items.find((x) => x.id === d.music.current);
-        if (it && !it.title) it.title = it.kind === 'playlist' ? `Playlist · ${title}` : title;
-      });
-    }
-  }
-  // Vídeo avulso terminou: toca o próximo da lista
-  if (e.data === YT.PlayerState.ENDED && current()?.kind === 'video') step(1);
+  playing = isOn;
+  if (newTitle) title = newTitle;
   if (was !== playing) {
     onPlayingChange(playing);
-    if (playing && !was && Math.random() < 0.3) say('🎵 Adoro essa!');
+    if (playing && Math.random() < 0.3) say('🎵 Adoro essa!');
   }
+  renderNow();
   renderControls();
 }
 
-export function init() {
-  window.onYouTubeIframeAPIReady = () => {
-    player = new YT.Player('yt', {
-      playerVars: { playsinline: 1, rel: 0 },
-      events: {
-        onReady: () => {
-          player.setVolume(bar.load().music.volume);
-          const item = current();
-          if (item) load(item, false);
-        },
-        onStateChange: onState,
-        onError: (e) => {
-          toast(ERRORS[e.data] ?? `Erro do YouTube (${e.data})`);
-          if (current()?.kind === 'video' && bar.load().music.items.length > 1) step(1);
-        },
-      },
-    });
-  };
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  tag.onerror = () => { $('#m-now').textContent = 'YouTube indisponível nesta rede.'; };
-  document.head.append(tag);
+const showError = (code) => toast(ERRORS[code] ?? `Erro do YouTube (${code})`);
 
-  $('#m-toggle').onclick = toggle;
-  $('#m-prev').onclick = () => step(-1);
-  $('#m-next').onclick = () => step(1);
+function startLocal(resume) {
+  if (local) return;
+  $('#player').innerHTML = '<div id="yt"></div>';
+  local = createPlayer('yt', { onState: (s) => setState(s.playing, s.title), onError: showError });
+  const item = resume && findItem(resume.id);
+  if (item) local.load(item, { autoplay: resume.playing, start: resume.start, index: resume.index });
+}
+
+function stopLocal() {
+  local?.destroy();
+  local = null;
+}
+
+function setDetached(on) {
+  detached = on;
+  if (on) stopLocal();
+  $('#music-sec').classList.toggle('detached', on);
+}
+
+// Comandos: vão para a janela destacada ou para o player embutido
+const control = {
+  load(item) { detached ? send({ type: 'load', id: item.id }) : local?.load(item); },
+  toggle() {
+    if (detached) return send({ type: 'toggle' });
+    if (!local?.toggle()) toast('Adicione um link do YouTube primeiro');
+  },
+  step(dir) { detached ? send({ type: 'step', dir }) : local?.step(dir); },
+  volume(v) { detached ? send({ type: 'volume', v }) : local?.setVolume(v); },
+};
+
+function detach() {
+  const win = window.open('player.html', 'barra-player', 'popup,width=460,height=340');
+  if (!win) return toast('O navegador bloqueou a janela. Permita pop-ups para este site.');
+  handoff = { id: currentItem()?.id, playing, ...(local?.position() ?? {}) };
+  local?.pause();
+  setDetached(true);
+  setState(false);
+}
+
+channel.onmessage = ({ data: msg }) => {
+  switch (msg.type) {
+    case 'hello': // a janela abriu e pede de onde continuar
+      setDetached(true);
+      send({ type: 'handoff', resume: handoff });
+      handoff = null;
+      break;
+    case 'state':
+      if (!detached) setDetached(true);
+      setState(msg.playing, msg.title);
+      break;
+    case 'bye': // a janela fechou: o player volta para a barra
+      setDetached(false);
+      setState(false);
+      startLocal(msg.resume);
+      refresh();
+      break;
+    case 'error':
+      showError(msg.code);
+      break;
+  }
+};
+
+export function init() {
+  $('#m-toggle').onclick = () => control.toggle();
+  $('#m-prev').onclick = () => control.step(-1);
+  $('#m-next').onclick = () => control.step(1);
+  $('#m-detach').onclick = detach;
+  $('#m-attach').onclick = () => send({ type: 'handback' });
   $('#m-volume').value = bar.load().music.volume;
   $('#m-volume').addEventListener('input', (e) => {
     const v = Number(e.target.value);
-    player?.setVolume?.(v);
     bar.update((d) => { d.music.volume = v; });
+    control.volume(v);
   });
 
   $('#m-form').addEventListener('submit', (e) => {
@@ -131,7 +130,8 @@ export function init() {
     input.value = '';
     const item = { id: bar.newId(), ...parsed, title: '' };
     bar.update((d) => { d.music.items.push(item); });
-    load(item);
+    control.load(item);
+    refresh();
   });
 
   $('#m-list').addEventListener('click', (e) => {
@@ -146,14 +146,27 @@ export function init() {
       return refresh();
     }
     if (e.target.closest('.rename')) {
-      const item = bar.load().music.items.find((x) => x.id === id);
+      const item = findItem(id);
       const name = prompt('Nome:', item?.title ?? '');
       if (name?.trim()) bar.update((d) => { d.music.items.find((x) => x.id === id).title = name.trim(); });
       return refresh();
     }
-    const item = bar.load().music.items.find((x) => x.id === id);
-    if (item) load(item);
+    const item = findItem(id);
+    if (item) {
+      control.load(item);
+      refresh();
+    }
   });
+
+  // Se a janela destacada já estiver aberta (barra recarregada), ela responde
+  send({ type: 'ping' });
+  setTimeout(() => { if (!detached) startLocal(); }, 500);
+}
+
+function renderNow() {
+  const item = currentItem();
+  $('#m-now').textContent = playing && title ? title
+    : item ? (item.title || 'Pronto para tocar') : 'Cole um link do YouTube abaixo';
 }
 
 function renderControls() {
@@ -165,8 +178,7 @@ function renderControls() {
 }
 
 export function render({ b }) {
-  const item = current(b);
-  if (!playing) $('#m-now').textContent = item ? (item.title || 'Pronto para tocar') : 'Cole um link do YouTube abaixo';
+  renderNow();
   $('#m-list').innerHTML = b.music.items.map((x) => `
     <li data-id="${x.id}" class="${x.id === b.music.current ? 'active' : ''}">
       <span class="m-kind">${x.kind === 'playlist' ? '☰' : '♪'}</span>

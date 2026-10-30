@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Player · Barra</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; margin: 0; }
+    html, body { height: 100%; }
+    body {
+      display: flex; flex-direction: column; gap: 6px; padding: 6px;
+      background: #000; color: #fff;
+      font: 12px -apple-system, "Segoe UI", system-ui, sans-serif;
+    }
+    .player { flex: 1; min-height: 0; border-radius: 8px; overflow: hidden; background: #111; }
+    .player iframe { width: 100%; height: 100%; display: block; }
+    .bottom { display: flex; align-items: center; gap: 8px; }
+    #now { flex: 1; color: #bbb; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    button { font: inherit; font-weight: 600; color: #5ac8fa; background: none; border: 0; cursor: pointer; }
+  </style>
+  <script type="module" src="js/popup.js"></script>
+</head>
+<body>
+  <div class="player"><div id="yt"></div></div>
+  <div class="bottom">
+    <span id="now"></span>
+    <button id="back" title="Volta a tocar dentro da barra">Voltar para a barra</button>
+  </div>
+</body>
+</html>
