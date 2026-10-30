@@ -1,5 +1,6 @@
 // Loja: catálogo, moedas, compra, equipar e conquistas.
 // Duas travas seguram o ritmo: o nível mínimo de cada item e o preço crescente.
+// Calibrado para liberar e comprar tudo em ~1 mês de uso bom (~150 XP/dia).
 
 import * as bar from './bar.js';
 import { $, esc } from './util.js';
@@ -11,36 +12,36 @@ import { roomSvg, furnitureSvg } from './room.js';
 export const CATALOG = [
   // Cenários
   { id: 'quarto', name: 'Quarto', cat: 'scene', slot: 'scene', level: 1, price: 0 },
-  { id: 'jardim', name: 'Jardim', cat: 'scene', slot: 'scene', level: 5, price: 60 },
-  { id: 'praia', name: 'Praia', cat: 'scene', slot: 'scene', level: 10, price: 150 },
-  { id: 'montanha', name: 'Montanha nevada', cat: 'scene', slot: 'scene', level: 15, price: 250 },
-  { id: 'estrelas', name: 'Noite estrelada', cat: 'scene', slot: 'scene', level: 20, price: 400 },
+  { id: 'jardim', name: 'Jardim', cat: 'scene', slot: 'scene', level: 4, price: 25 },
+  { id: 'praia', name: 'Praia', cat: 'scene', slot: 'scene', level: 7, price: 50 },
+  { id: 'montanha', name: 'Montanha nevada', cat: 'scene', slot: 'scene', level: 10, price: 80 },
+  { id: 'estrelas', name: 'Noite estrelada', cat: 'scene', slot: 'scene', level: 13, price: 120 },
   // Casinha
-  { id: 'tapete', name: 'Tapete', cat: 'room', slot: 'rug', level: 2, price: 20 },
-  { id: 'planta', name: 'Plantinha', cat: 'room', slot: 'floorL', level: 3, price: 30 },
-  { id: 'quadro', name: 'Quadro', cat: 'room', slot: 'wall', level: 5, price: 50 },
-  { id: 'luminaria', name: 'Luminária', cat: 'room', slot: 'floorR', level: 6, price: 60 },
-  { id: 'estante', name: 'Estante', cat: 'room', slot: 'floorL', level: 11, price: 130 },
-  { id: 'aquario', name: 'Aquário', cat: 'room', slot: 'floorR', level: 12, price: 150 },
-  { id: 'relogio', name: 'Relógio de parede', cat: 'room', slot: 'wall', level: 15, price: 180 },
-  { id: 'poltrona', name: 'Poltrona', cat: 'room', slot: 'floorR', level: 16, price: 220 },
-  { id: 'telescopio', name: 'Telescópio', cat: 'room', slot: 'floorL', level: 21, price: 320 },
+  { id: 'tapete', name: 'Tapete', cat: 'room', slot: 'rug', level: 2, price: 10 },
+  { id: 'planta', name: 'Plantinha', cat: 'room', slot: 'floorL', level: 2, price: 15 },
+  { id: 'quadro', name: 'Quadro', cat: 'room', slot: 'wall', level: 3, price: 20 },
+  { id: 'luminaria', name: 'Luminária', cat: 'room', slot: 'floorR', level: 4, price: 25 },
+  { id: 'estante', name: 'Estante', cat: 'room', slot: 'floorL', level: 6, price: 40 },
+  { id: 'aquario', name: 'Aquário', cat: 'room', slot: 'floorR', level: 7, price: 50 },
+  { id: 'relogio', name: 'Relógio de parede', cat: 'room', slot: 'wall', level: 9, price: 60 },
+  { id: 'poltrona', name: 'Poltrona', cat: 'room', slot: 'floorR', level: 10, price: 70 },
+  { id: 'telescopio', name: 'Telescópio', cat: 'room', slot: 'floorL', level: 13, price: 100 },
   // Fantasias
-  { id: 'laco', name: 'Laço', cat: 'costume', slot: 'head', level: 2, price: 25 },
-  { id: 'palha', name: 'Chapéu de palha', cat: 'costume', slot: 'head', level: 4, price: 40 },
-  { id: 'oculos', name: 'Óculos redondos', cat: 'costume', slot: 'face', level: 7, price: 70 },
-  { id: 'cachecol', name: 'Cachecol', cat: 'costume', slot: 'neck', level: 8, price: 80 },
-  { id: 'mago', name: 'Chapéu de mago', cat: 'costume', slot: 'head', level: 12, price: 160 },
-  { id: 'gravata', name: 'Gravata borboleta', cat: 'costume', slot: 'neck', level: 13, price: 150 },
-  { id: 'flores', name: 'Coroa de flores', cat: 'costume', slot: 'head', level: 17, price: 250 },
-  { id: 'sol', name: 'Óculos de sol', cat: 'costume', slot: 'face', level: 19, price: 280 },
-  { id: 'coroa', name: 'Coroa', cat: 'costume', slot: 'head', level: 25, price: 450 },
+  { id: 'laco', name: 'Laço', cat: 'costume', slot: 'head', level: 2, price: 10 },
+  { id: 'palha', name: 'Chapéu de palha', cat: 'costume', slot: 'head', level: 3, price: 15 },
+  { id: 'oculos', name: 'Óculos redondos', cat: 'costume', slot: 'face', level: 5, price: 25 },
+  { id: 'cachecol', name: 'Cachecol', cat: 'costume', slot: 'neck', level: 5, price: 30 },
+  { id: 'mago', name: 'Chapéu de mago', cat: 'costume', slot: 'head', level: 8, price: 50 },
+  { id: 'gravata', name: 'Gravata borboleta', cat: 'costume', slot: 'neck', level: 8, price: 50 },
+  { id: 'flores', name: 'Coroa de flores', cat: 'costume', slot: 'head', level: 11, price: 80 },
+  { id: 'sol', name: 'Óculos de sol', cat: 'costume', slot: 'face', level: 12, price: 90 },
+  { id: 'coroa', name: 'Coroa', cat: 'costume', slot: 'head', level: 14, price: 140 },
   // Conquistas: não se compram, só se ganham
-  { id: 'medalha', name: 'Medalha da hidratação', cat: 'costume', slot: 'neck', ach: { stat: 'maxStreak', goal: 7, text: '7 dias seguidos na meta de água' } },
-  { id: 'faixa', name: 'Faixa de atleta', cat: 'costume', slot: 'head', ach: { stat: 'stretch', goal: 50, text: '50 alongamentos' } },
-  { id: 'fones', name: 'Fones de ouvido', cat: 'costume', slot: 'head', ach: { stat: 'focus', goal: 30, text: '30 sessões de foco' } },
-  { id: 'trofeu', name: 'Troféu', cat: 'room', slot: 'floorR', ach: { stat: 'tasks', goal: 100, text: '100 tarefas concluídas' } },
-  { id: 'garrafa', name: 'Garrafa dourada', cat: 'room', slot: 'floorL', ach: { stat: 'waterMl', goal: 100000, text: '100 litros de água', unit: 1000 } },
+  { id: 'medalha', name: 'Medalha da hidratação', cat: 'costume', slot: 'neck', ach: { stat: 'maxStreak', goal: 5, text: '5 dias seguidos na meta de água' } },
+  { id: 'faixa', name: 'Faixa de atleta', cat: 'costume', slot: 'head', ach: { stat: 'stretch', goal: 25, text: '25 alongamentos' } },
+  { id: 'fones', name: 'Fones de ouvido', cat: 'costume', slot: 'head', ach: { stat: 'focus', goal: 12, text: '12 sessões de foco' } },
+  { id: 'trofeu', name: 'Troféu', cat: 'room', slot: 'floorR', ach: { stat: 'tasks', goal: 40, text: '40 tarefas concluídas' } },
+  { id: 'garrafa', name: 'Garrafa dourada', cat: 'room', slot: 'floorL', ach: { stat: 'waterMl', goal: 40000, text: '40 litros de água', unit: 1000 } },
 ];
 
 const byId = Object.fromEntries(CATALOG.map((x) => [x.id, x]));
@@ -56,7 +57,8 @@ let tab = 'scene';
 let lastCtx = null;
 
 export const achieved = (item, g) => Boolean(item.ach && g.stats[item.ach.stat] >= item.ach.goal);
-export const spent = (b) => b.shop.owned.reduce((sum, o) => sum + o.price, 0);
+// Usa o preço atual do catálogo, para quem comprou antes de um ajuste de preço não sair perdendo
+export const spent = (b) => b.shop.owned.reduce((sum, o) => sum + (byId[o.id]?.price ?? o.price), 0);
 export const coins = (b, g) => g.coinsEarned - spent(b);
 
 export function owns(b, g, id) {

@@ -14,8 +14,8 @@ export const RULES = {
   tasks: [10, 10, 10, 5, 5, 5], taskRest: 2, // rende menos depois de muitas no dia
 };
 
-// Moedas: 1 a cada 10 XP. Vêm do XP, então também não dá para inflar.
-export const COIN_XP = 10;
+// Moedas: 1 a cada 4 XP. Vêm do XP, então também não dá para inflar.
+export const COIN_XP = 4;
 
 export const xpAt = (level) => 25 * (level - 1) ** 2;
 export const levelFor = (xp) => Math.floor(Math.sqrt(xp / 25)) + 1;

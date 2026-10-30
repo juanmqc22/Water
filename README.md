@@ -34,14 +34,14 @@ O XP é calculado a partir dos registros reais, então desfazer também desfaz o
 
 ### Moedas e loja
 
-A cada 10 XP o pet ganha 1 moeda (retroativo e também desfeito pelo "desfazer").
-Um dia bom rende ~15–18 moedas; o máximo fica em ~33.
+A cada 4 XP o pet ganha 1 moeda (retroativo e também desfeito pelo "desfazer").
+Um dia bom (~150 XP) rende ~37 moedas.
 
-Cada item da loja tem **nível mínimo** e **preço crescente** (20 a 450 moedas), então o catálogo
-inteiro (~3.500 moedas) leva meses. Há 5 cenários (o céu muda com a hora do dia), 9 móveis em
-posições fixas (parede, tapete, chão esquerdo e direito), 9 fantasias (cabeça, rosto, pescoço)
-e 5 itens de **conquista**, que não se compram: 7 dias seguidos na meta de água, 50 alongamentos,
-30 focos, 100 tarefas e 100 litros de água.
+Cada item da loja tem **nível mínimo** (2 a 14) e **preço crescente** (10 a 140 moedas). O catálogo
+inteiro custa ~1.150 moedas: cerca de **1 mês** de uso bom para liberar e comprar tudo.
+Há 5 cenários (o céu muda com a hora do dia), 9 móveis em posições fixas (parede, tapete, chão
+esquerdo e direito), 9 fantasias (cabeça, rosto, pescoço) e 5 itens de **conquista**, que não se
+compram: 5 dias seguidos na meta de água, 25 alongamentos, 12 focos, 40 tarefas e 40 litros de água.
 
 O pet nunca morre nem foge: com necessidades baixas ele só fica com sede, cansado ou triste.
 Fora do expediente ele dorme e os lembretes param.
