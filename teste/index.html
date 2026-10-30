@@ -123,10 +123,9 @@
       clearTimeout(apiTimeout);
       set('yt-api', 'ok', 'ok');
       player = new YT.Player('player', {
-        videoId: 'jfKfPfyJRdk', // rádio lo-fi ao vivo, permite embed
         playerVars: { playsinline: 1, rel: 0 },
         events: {
-          onReady: () => set('yt-play', 'pronto, aperte play', 'warn'),
+          onReady: () => set('yt-play', 'cole um link para testar', 'warn'),
           onStateChange: (e) => {
             if (e.data === YT.PlayerState.PLAYING) set('yt-play', 'tocando', 'ok');
           },
