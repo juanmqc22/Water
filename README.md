@@ -13,6 +13,10 @@ Os dados ficam no `localStorage` do navegador. O histórico do antigo app Água 
 - **Água:** anel de progresso com marcador de ritmo, garrafa, copo, treino (+500 ml), semana e desfazer.
   Os links de garrafa (`?tag=<token>`) continuam funcionando.
 - **Pausas:** alongar e descansar a vista, com lembretes, adiar 10 min e modo foco (25/50 min).
+- **Almoço:** botão "Sair para almoçar" (com lembrete opcional no horário escolhido). Congela lembretes,
+  ritmo da água e energia até você voltar, e o pet almoça junto.
+- **Lembrete de água pelo ritmo:** só chama quando você fica um copo (250 ml) atrás do ritmo do dia,
+  no máximo a cada 30 min e nunca logo depois de beber.
 - **Tarefas e notas:** lista do dia e um bloco de notas que salva sozinho.
 - **Música:** player do YouTube com links e playlists salvos. O botão **Destacar ↗** abre o player numa janela
   separada, que continua tocando com a barra lateral fechada (o Edge pausa a mídia do painel ao fechar).

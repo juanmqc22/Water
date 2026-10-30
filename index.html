@@ -88,6 +88,7 @@
           <button class="btn" id="b-stretch">🙆 Alonguei <small id="b-stretch-count"></small></button>
           <button class="btn" id="b-eyes">👀 Vista <small id="b-eyes-count"></small></button>
         </div>
+        <div class="lunch-row" id="b-lunch"></div>
         <div class="focus-row" id="b-focus"></div>
         <p class="muted tiny" id="b-next"></p>
       </div>
@@ -184,13 +185,14 @@
       <label class="row">Início<span class="field"><input id="s-work-start" type="number"> h</span></label>
       <label class="row">Fim<span class="field"><input id="s-work-end" type="number"> h</span></label>
     </div>
-    <p class="group-note">Fora do expediente o pet dorme e os lembretes param.</p>
+    <p class="group-note">Fora do expediente o pet dorme e os lembretes param. No almoço tudo fica pausado até você voltar.</p>
 
     <p class="group-title">Lembretes</p>
     <div class="group">
       <label class="row"><span><input type="checkbox" id="s-stretch-on"> Alongar a cada</span><span class="field"><input id="s-stretch-every" type="number"> min</span></label>
       <label class="row"><span><input type="checkbox" id="s-eyes-on"> Descansar a vista a cada</span><span class="field"><input id="s-eyes-every" type="number"> min</span></label>
-      <label class="row"><span><input type="checkbox" id="s-water-on"> Água, se sem beber há</span><span class="field"><input id="s-water-every" type="number"> min</span></label>
+      <label class="row"><span><input type="checkbox" id="s-water-on"> Água quando ficar atrás do ritmo</span></label>
+      <label class="row"><span><input type="checkbox" id="s-lunch-on"> Lembrar do almoço às</span><input id="s-lunch-at" type="time" class="time-input"></label>
     </div>
 
     <p class="group-title">Alertas</p>

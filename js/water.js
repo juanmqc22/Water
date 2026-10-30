@@ -3,6 +3,7 @@
 import * as store from './storage.js';
 import { $, esc, dayKey, startOfDay, addDays, clockTime, liters, amount, hoursOf } from './util.js';
 import { toast, refresh } from './ui.js';
+import { paceFraction, lunchNow } from './game.js';
 
 export const GLASS_ML = 250;
 const DEFAULT_BOTTLE_ML = 500;
@@ -35,12 +36,12 @@ export async function record(ml, tagToken = null, source = 'manual') {
   });
 }
 
-function statusFor(total, goal, s, now, bottleMl) {
+function statusFor(total, goal, s, now, bottleMl, frac, lunch) {
   if (total >= goal) return ['done', 'Meta atingida'];
   const h = hoursOf(now);
   if (h < s.windowStart) return total ? ['ok', 'No ritmo'] : ['idle', `Começa às ${s.windowStart}h`];
   if (h >= s.windowEnd) return ['behind', `Faltam ${amount(goal - total)}`];
-  const frac = (h - s.windowStart) / (s.windowEnd - s.windowStart);
+  if (lunch) return ['idle', 'Ritmo pausado no almoço'];
   const delta = total - goal * frac;
   if (delta >= bottleMl / 2) return ['ahead', `${amount(delta)} à frente`];
   if (delta > -bottleMl / 2) return ['ok', 'No ritmo'];
@@ -94,7 +95,7 @@ export async function handleTagLink() {
   await record(tag.ml, token, 'nfc');
 }
 
-export function render({ now, water: w }) {
+export function render({ now, water: w, b }) {
   const s = w.settings;
   const today = startOfDay(now);
   const key = dayKey(today);
@@ -107,7 +108,8 @@ export function render({ now, water: w }) {
   const total = totals[key] ?? 0;
   const goal = goalFor(key);
   const bottle = mainBottle(w);
-  const [tone, status] = statusFor(total, goal, s, now, bottle.ml);
+  const frac = paceFraction(now, s, b);
+  const [tone, status] = statusFor(total, goal, s, now, bottle.ml, frac, lunchNow(b));
 
   $('#water-meta').textContent = `${liters(total)} / ${liters(goal)} L`;
   $('#w-amount').textContent = liters(total);
@@ -122,7 +124,6 @@ export function render({ now, water: w }) {
   fill.classList.toggle('done', pct >= 1);
   fill.style.opacity = pct > 0 ? 1 : 0;
 
-  const frac = Math.min(1, Math.max(0, (hoursOf(now) - s.windowStart) / (s.windowEnd - s.windowStart)));
   const pace = $('#ring-pace');
   pace.style.display = frac > 0 && frac < 1 && total < goal ? '' : 'none';
   const a = frac * 2 * Math.PI - Math.PI / 2;

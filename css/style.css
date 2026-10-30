@@ -167,6 +167,10 @@ textarea { resize: vertical; line-height: 1.45; }
 .pet.dance .pet-body { animation: dance 0.6s ease-in-out infinite; }
 .pet.sleep .pet-body { animation: breathe 4s ease-in-out infinite; }
 .pet.jump .pet-body { animation: jump 0.55s ease-out; }
+.pet.eating .pet-body { animation: munch 1.1s ease-in-out infinite; }
+.pet .chew { transform-box: fill-box; transform-origin: center; animation: chew 0.55s ease-in-out infinite; }
+.pet .steam { animation: steam 2.2s ease-in-out infinite; }
+.pet .spoon { transform-box: fill-box; transform-origin: 0% 100%; animation: spoon 1.1s ease-in-out infinite; }
 .pet.evolve svg { animation: evolve 1.5s ease-in-out; }
 .pet .flame { transform-origin: 50px 40px; animation: flicker 1.2s ease-in-out infinite; }
 .pet .sparks, .pet .zzz { animation: floaty 2.4s ease-in-out infinite; }
@@ -186,6 +190,10 @@ textarea { resize: vertical; line-height: 1.45; }
   30% { filter: brightness(2.2) saturate(0); transform: scale(1.12); }
   60% { filter: brightness(1.6); transform: scale(0.96); }
 }
+@keyframes munch { 50% { transform: translateY(2px) rotate(-2deg); } }
+@keyframes chew { 50% { transform: scaleY(0.35); } }
+@keyframes steam { 0% { transform: translateY(2px); opacity: 0; } 40% { opacity: 0.85; } 100% { transform: translateY(-5px); opacity: 0; } }
+@keyframes spoon { 50% { transform: rotate(-18deg) translate(-2px, -2px); } }
 @keyframes flicker { 50% { transform: scale(1.06, 0.94); } }
 @keyframes floaty { 50% { transform: translateY(-3px); opacity: 0.6; } }
 
@@ -274,6 +282,10 @@ textarea { resize: vertical; line-height: 1.45; }
 .focus-row { display: flex; align-items: center; gap: 6px; }
 .focus-row > span { flex: 1; font-weight: 600; font-size: 13px; }
 .focus-on { color: #ff5a5f; }
+.lunch-row { display: flex; align-items: center; gap: 6px; }
+.lunch-row > span { flex: 1; font-weight: 600; font-size: 13px; color: var(--tone-behind); }
+.lunch-row .wide-btn { flex: 1; }
+.group .row > .time-input { width: 104px; }
 
 /* Tarefas */
 

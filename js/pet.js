@@ -139,6 +139,10 @@ function face(stage, mood) {
          <path d="M${50 + ex * 2.1} ${ey - 6} q 2.4 3.6 0 5 q -2.4 -1.4 0 -5 z" fill="#8fd3ff"/>`;
     case 'sleep':
       return eyes(arc(-1)) + cheeks + `<circle cx="50" cy="${my + 1}" r="${1.5 * s}" fill="#7a2d3a"/>`;
+    case 'eat':
+      return eyes(arc(1)) + cheeks +
+        `<ellipse class="chew" cx="50" cy="${my + 1}" rx="${3.2 * s}" ry="${2.4 * s}" fill="#7a2d3a"/>
+         <circle cx="${50 - 6 * s}" cy="${my + 4 * s}" r="${0.9 * s}" fill="#fff"/>`;
     case 'focus':
       return eyes(open) + stroke(`M${50 - 3 * s} ${my} Q 50 ${my + 2} ${50 + 3 * s} ${my}`) +
         `<rect x="${50 - 20 * s}" y="${ey - 11 * s}" width="${40 * s}" height="${3.4 * s}" rx="1.7" fill="#ff5a5f"/>`;
@@ -164,6 +168,19 @@ export function anchors(species, stage) {
   };
 }
 
+// Tigela com vapor e colher, na frente do pet enquanto ele almoça
+function meal(r) {
+  return `<g class="meal" transform="translate(50 ${CY + r * 0.68}) scale(${r / 30})">
+    <g class="steam" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".85">
+      <path d="M-6 -7 q -3 -5 0 -9 q 3 -4 0 -8"/><path d="M3 -8 q -3 -5 0 -9 q 3 -4 0 -8"/></g>
+    <path d="M-17 0 H17 a 17 13 0 0 1 -34 0 Z" fill="#ff8a5b" stroke="#d9663a" stroke-width="1.2"/>
+    <ellipse cx="0" cy="0" rx="16" ry="2.6" fill="#fff6e0"/>
+    <circle cx="-5" cy="-1" r="2" fill="#7cc46a"/><circle cx="4" cy="-1.4" r="2.2" fill="#ffcf3f"/>
+    <g class="spoon"><path d="M12 -2 L 24 -16" stroke="#c8ccd6" stroke-width="2.4" stroke-linecap="round"/>
+      <ellipse cx="25" cy="-17.5" rx="3" ry="2" fill="#c8ccd6" transform="rotate(-50 25 -17.5)"/></g>
+  </g>`;
+}
+
 export function petSvg(species, stage, mood = 'happy', worn = {}) {
   const c = SPECIES[species] ?? SPECIES.agua;
   const r = R[stage - 1];
@@ -173,6 +190,7 @@ export function petSvg(species, stage, mood = 'happy', worn = {}) {
   return `<svg viewBox="0 0 100 100" aria-hidden="true">
     <ellipse class="shadow" cx="50" cy="${CY + r * 0.9 + 4}" rx="${r * 0.9}" ry="3.2" fill="currentColor" opacity=".12"/>
     <g class="pet-body">${BODIES[species]?.(c, stage, r) ?? BODIES.agua(c, stage, r)}${face(stage, mood)}${drawCostumes(anchors(species, stage), worn)}</g>
+    ${mood === 'eat' ? meal(r) : ''}
     ${zzz}
   </svg>`;
 }

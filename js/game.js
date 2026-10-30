@@ -104,26 +104,54 @@ export function compute({ now, water, b }) {
   };
 }
 
+// Almoço em andamento (ou null)
+export const lunchNow = (b) => {
+  const l = b.lunches.at(-1);
+  return l && !l.end ? l : null;
+};
+
+const LUNCH_PLANNED_MIN = 60;
+
+function lunchMinToday(b, now) {
+  const k = dayKey(now);
+  return b.lunches
+    .filter((l) => dayKey(new Date(l.start)) === k)
+    .reduce((m, l) => m + ((l.end ? Date.parse(l.end) : now.getTime()) - Date.parse(l.start)) / MIN, 0);
+}
+
+// Quanto do "dia de água" já passou (0–1). O tempo de almoço não conta, e o
+// dia é dividido já reservando 1 h de almoço: durante o almoço o ritmo fica parado.
+export function paceFraction(now, s, b) {
+  const len = (s.windowEnd - s.windowStart) * 60;
+  const lunch = lunchMinToday(b, now);
+  const elapsed = (hoursOf(now) - s.windowStart) * 60 - lunch;
+  return clamp(elapsed / (len - Math.max(lunch, LUNCH_PLANNED_MIN)), 0, 1);
+}
+
 // Necessidades (0–100) e a cara do pet
 function needsFor({ now, water, b, totals, goalFor, todayKey }) {
   const s = water.settings;
   const total = totals[todayKey] ?? 0;
   const goal = goalFor(todayKey);
-  const pace = clamp((hoursOf(now) - s.windowStart) / (s.windowEnd - s.windowStart), 0, 1);
-  const expected = goal * pace;
+  const expected = goal * paceFraction(now, s, b);
+  const lunch = lunchNow(b);
   const hydration = total >= goal || expected <= 0 ? 100 : clamp((total / expected) * 100);
 
   const working = inWork(b.prefs, now);
   let energy = 100;
   if (working) {
     const lastStretch = b.breaks.filter((x) => x.kind === 'stretch').at(-1);
+    const lastLunch = b.lunches.filter((l) => l.end).at(-1);
     const since = Math.max(
       atHour(now, b.prefs.workStart).getTime(),
       b.pet ? Date.parse(b.pet.createdAt) : 0,
       lastStretch ? Date.parse(lastStretch.at) : 0,
+      lastLunch ? Date.parse(lastLunch.end) : 0,
     );
+    // No almoço a energia congela no valor de quando você saiu
+    const ref = lunch ? Date.parse(lunch.start) : now.getTime();
     const every = b.reminders.stretch.every;
-    energy = clamp(100 - ((now - since) / MIN / (every * 2)) * 100);
+    energy = clamp(100 - ((ref - since) / MIN / (every * 2)) * 100);
   }
 
   const open = b.tasks.filter((t) => !t.doneAt && !t.archived).length;
@@ -132,7 +160,11 @@ function needsFor({ now, water, b, totals, goalFor, todayKey }) {
 
   const focusing = isFocusing(b, now);
   const needs = { water: Math.round(hydration), energy: Math.round(energy), mood: Math.round(mood) };
-  return { needs, face: faceFor(needs, working, focusing), working, focusing };
+  return {
+    needs, working, focusing, lunch,
+    face: lunch ? 'eat' : faceFor(needs, working, focusing),
+    hydration: { total, goal, expected },
+  };
 }
 
 export function isFocusing(b, now) {

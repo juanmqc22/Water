@@ -21,10 +21,10 @@ async function render() {
   $('#s-species').value = b.pet?.species ?? 'agua';
   $('#s-work-start').value = b.prefs.workStart;
   $('#s-work-end').value = b.prefs.workEnd;
-  for (const k of ['stretch', 'eyes', 'water']) {
-    $(`#s-${k}-on`).checked = b.reminders[k].on;
-    $(`#s-${k}-every`).value = b.reminders[k].every;
-  }
+  for (const k of ['stretch', 'eyes']) $(`#s-${k}-every`).value = b.reminders[k].every;
+  for (const k of ['stretch', 'eyes', 'water']) $(`#s-${k}-on`).checked = b.reminders[k].on;
+  $('#s-lunch-on').checked = b.prefs.lunchReminder;
+  $('#s-lunch-at').value = b.prefs.lunchAt;
   $('#s-sound').checked = b.prefs.sound;
   $('#s-notify').checked = b.prefs.notify;
   $('#s-notify-state').textContent = !('Notification' in window) ? 'não suportado'
@@ -90,10 +90,15 @@ export function init() {
   const hour = (v) => Number.isInteger(v) && v >= 0 && v <= 24;
   num('#s-work-start', (v) => hour(v) && v < bar.load().prefs.workEnd, (v) => bar.update((d) => { d.prefs.workStart = v; }));
   num('#s-work-end', (v) => hour(v) && v > bar.load().prefs.workStart, (v) => bar.update((d) => { d.prefs.workEnd = v; }));
-  for (const k of ['stretch', 'eyes', 'water']) {
-    check(`#s-${k}-on`, (d, on) => { d.reminders[k].on = on; });
+  for (const k of ['stretch', 'eyes', 'water']) check(`#s-${k}-on`, (d, on) => { d.reminders[k].on = on; });
+  for (const k of ['stretch', 'eyes']) {
     num(`#s-${k}-every`, (v) => v >= 10 && v <= 240, (v) => bar.update((d) => { d.reminders[k].every = v; }));
   }
+  check('#s-lunch-on', (d, on) => { d.prefs.lunchReminder = on; });
+  $('#s-lunch-at').addEventListener('change', (e) => {
+    if (e.target.value) bar.update((d) => { d.prefs.lunchAt = e.target.value; });
+    refresh();
+  });
   check('#s-sound', (d, on) => { d.prefs.sound = on; });
   check('#s-notify', (d, on) => { d.prefs.notify = on; });
   $('#s-test').onclick = async () => {

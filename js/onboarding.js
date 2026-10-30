@@ -121,6 +121,10 @@ const STEPS = [
         <label class="row">Começo<span class="field"><input id="ob-work-start" type="number" value="${draft.workStart}"> h</span></label>
         <label class="row">Fim<span class="field"><input id="ob-work-end" type="number" value="${draft.workEnd}"> h</span></label>
       </div>
+      <p><b>Almoço:</b> quando sair, aperte <b>Sair para almoçar</b> (em Pausas). Tudo congela até você voltar, e o pet almoça junto. 😋</p>
+      <div class="group">
+        <label class="row"><span><input type="checkbox" id="ob-lunch-on" ${draft.lunchReminder ? 'checked' : ''}> Lembrar às</span><input id="ob-lunch-at" type="time" class="time-input" value="${draft.lunchAt}"></label>
+      </div>
       <p><b>Dia de água:</b> de quando você acorda até umas 2 h antes de dormir. A meta é dividida nesse período, e o anel mostra se você está no ritmo.</p>
       <div class="group">
         <label class="row">De<span class="field"><input id="ob-win-start" type="number" value="${draft.windowStart}"> h</span></label>
@@ -130,6 +134,8 @@ const STEPS = [
       for (const [id, key] of [['ob-work-start', 'workStart'], ['ob-work-end', 'workEnd'], ['ob-win-start', 'windowStart'], ['ob-win-end', 'windowEnd']]) {
         $(`#${id}`).oninput = (e) => { draft[key] = int(e.target.value); };
       }
+      $('#ob-lunch-on').onchange = (e) => { draft.lunchReminder = e.target.checked; };
+      $('#ob-lunch-at').oninput = (e) => { draft.lunchAt = e.target.value || draft.lunchAt; };
     },
     check: () => {
       if (![draft.workStart, draft.workEnd, draft.windowStart, draft.windowEnd].every(isHour)) return 'Use horas cheias, de 0 a 24.';
@@ -143,15 +149,16 @@ const STEPS = [
       const r = draft.reminders;
       const row = (k, label) => `
         <label class="row"><span><input type="checkbox" data-on="${k}" ${r[k].on ? 'checked' : ''}> ${label}</span>
-        <span class="field"><input type="number" data-every="${k}" value="${r[k].every}"> min</span></label>`;
+        ${k !== 'water' ? `<span class="field"><input type="number" data-every="${k}" value="${r[k].every}"> min</span>` : ''}</label>`;
       return `
         <h2>🔔 Lembretes</h2>
         <p>O pet avisa no balão dele. Escolha o que quer e de quanto em quanto tempo:</p>
         <div class="group">
           ${row('stretch', 'Alongar a cada')}
           ${row('eyes', 'Descansar a vista a cada')}
-          ${row('water', 'Água, se sem beber há')}
+          ${row('water', 'Água quando ficar atrás do ritmo')}
         </div>
+        <p class="muted small">A água não lembra de hora em hora: o pet só chama quando você fica um copo atrás do ritmo do dia.</p>
         <p>Para não perder os avisos quando estiver em outra janela, libere <b>som</b> e <b>notificações</b>:</p>
         <div class="group">
           <label class="row"><span><input type="checkbox" id="ob-sound" ${draft.sound ? 'checked' : ''}> Tocar som</span></label>
@@ -181,7 +188,7 @@ const STEPS = [
       };
       state();
     },
-    check: () => (Object.values(draft.reminders).every((r) => r.every >= 10 && r.every <= 240)
+    check: () => (['stretch', 'eyes'].every((k) => draft.reminders[k].every >= 10 && draft.reminders[k].every <= 240)
       ? null : 'Intervalos entre 10 e 240 minutos.'),
   },
   {
@@ -220,6 +227,8 @@ async function finish() {
     d.prefs.workStart = draft.workStart;
     d.prefs.workEnd = draft.workEnd;
     d.prefs.sound = draft.sound;
+    d.prefs.lunchAt = draft.lunchAt;
+    d.prefs.lunchReminder = draft.lunchReminder;
     d.reminders = draft.reminders;
   });
   await store.updateSettings({
@@ -272,6 +281,8 @@ export async function open(done = () => {}) {
     bottleMl: bottle?.ml ?? 500,
     workStart: b.prefs.workStart,
     workEnd: b.prefs.workEnd,
+    lunchAt: b.prefs.lunchAt,
+    lunchReminder: b.prefs.lunchReminder,
     windowStart: s.windowStart,
     windowEnd: s.windowEnd,
     sound: b.prefs.sound,

@@ -10,15 +10,16 @@ const DEFAULTS = {
   notes: '',
   breaks: [], // { at, kind: 'stretch' | 'eyes' } — só pausas que contaram
   focus: [], // { start, end, done }
+  lunches: [], // { start, end }
   music: { items: [], current: null, volume: 60 }, // item: { id, kind, ref, title }
   reminders: {
     stretch: { on: true, every: 60 },
     eyes: { on: true, every: 40 },
-    water: { on: true, every: 60 },
+    water: { on: true }, // pelo ritmo, não por intervalo
   },
   remState: {}, // { kind: { fired } }
   shop: { owned: [], equipped: {} }, // owned: { id, price, at }; equipped: { slot: id }
-  prefs: { workStart: 8, workEnd: 18, sound: true, notify: true },
+  prefs: { workStart: 8, workEnd: 18, lunchAt: '12:00', lunchReminder: true, sound: true, notify: true },
   ui: { collapsed: {} },
 };
 

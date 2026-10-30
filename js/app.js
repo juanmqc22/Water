@@ -68,7 +68,7 @@ function renderClock(now) {
 
 function renderPet({ b, g }) {
   if (!b.pet) return;
-  const mood = g.face === 'focus' || g.face === 'sleep' ? g.face : music.isPlaying() ? 'happy' : g.face;
+  const mood = ['focus', 'sleep', 'eat'].includes(g.face) ? g.face : music.isPlaying() ? 'happy' : g.face;
   const el = $('#pet');
   const worn = shop.equipped(b);
   const key = `${b.pet.species}|${g.stage}|${mood}|${worn.head}|${worn.face}|${worn.neck}`;
@@ -76,8 +76,9 @@ function renderPet({ b, g }) {
     el.innerHTML = petSvg(b.pet.species, g.stage, mood, worn);
     el.dataset.key = key;
   }
-  el.classList.toggle('dance', music.isPlaying() && mood !== 'sleep');
+  el.classList.toggle('dance', music.isPlaying() && !['sleep', 'eat'].includes(mood));
   el.classList.toggle('sleep', mood === 'sleep');
+  el.classList.toggle('eating', mood === 'eat');
   el.classList.toggle('low', ['sad', 'tired', 'thirsty'].includes(mood));
 
   $('#pet-name').textContent = b.pet.name;
@@ -152,7 +153,7 @@ const LINES = {
 };
 
 function chatter({ now, b, g }) {
-  if (!b.pet || !g.working || g.focusing || balloonBusy()) return;
+  if (!b.pet || !g.working || g.focusing || g.lunch || balloonBusy()) return;
   if (now - lastChatter < CHATTER_EVERY) return;
   lastChatter = now.getTime();
   const [worst, value] = Object.entries(g.needs).sort((a, c) => a[1] - c[1])[0];
@@ -162,6 +163,11 @@ function chatter({ now, b, g }) {
 function greet(b, g) {
   const h = hoursOf(new Date());
   const hello = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  if (g.lunch) {
+    return say('Ainda tô almoçando… 😋 Me avisa quando voltar.', {
+      sticky: true, id: 'eating', actions: [{ label: 'Voltei!', primary: true, fn: breaks.endLunch }],
+    });
+  }
   if (!g.working) return say(`${hello}! Tô descansando, fora do expediente. 😴`);
   const open = b.tasks.filter((t) => !t.doneAt && !t.archived).length;
   say(`${hello}! ${open ? `Temos ${open} tarefa${open > 1 ? 's' : ''} hoje.` : 'Bora começar?'} 💪`);
