@@ -202,7 +202,7 @@ const STEPS = [
         <li>🙆 pausas quando ele chamar (ou nos botões de Pausas)</li>
         <li>✅ tarefas concluídas e sessões de foco</li>
       </ul>
-      <p><b>Moedas:</b> a cada 2 XP você ganha 1 🪙. Use na <b>Loja</b> (botão no canto da casinha) para comprar cenários, móveis e fantasias. Os itens vão liberando conforme o nível sobe.</p>
+      <p><b>Moedas:</b> a cada 10 XP você ganha 1 🪙. Use na <b>Loja</b> (botão no canto da casinha) para comprar cenários, móveis e fantasias. Os itens vão liberando conforme o nível sobe.</p>
       <p class="muted small">Ele nunca morre: se você esquecer de algo, só fica tristinho até você voltar. Seus dados ficam só neste navegador; de vez em quando exporte um backup em Ajustes.</p>`,
   },
 ];

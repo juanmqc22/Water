@@ -29,17 +29,17 @@ O XP é calculado a partir dos registros reais, então desfazer também desfaz o
 
 | Ação | XP | Limite por dia |
 |---|---|---|
-| Água | 1 a cada 50 ml | até a meta |
-| Meta de água batida | 20 + 2 por dia de sequência | sequência conta até +20 |
-| Alongar | 10 | 8 (mín. 15 min entre elas) |
-| Descansar a vista | 3 | 10 (mín. 10 min entre elas) |
-| Foco concluído | 15 | 6 |
-| Tarefa concluída | 10, 10, 10, 5, 5, 5, depois 2 | — |
+| Água | 30 por copo de 250 ml (6 a cada 50 ml) | até a meta |
+| Meta de água batida | 100 + 10 por dia de sequência | sequência conta até +100 |
+| Alongar | 50 | 8 (mín. 15 min entre elas) |
+| Descansar a vista | 25 | 10 (mín. 10 min entre elas) |
+| Foco concluído | 75 | 6 |
+| Tarefa concluída | 50, 50, 50, 25, 25, 25, depois 10 | — |
 
 ### Moedas e loja
 
-A cada 2 XP o pet ganha 1 moeda (retroativo e também desfeito pelo "desfazer").
-O nível N pede 14 × (N−1)² XP. Com um dia bom (~250 XP): nível 5 (1ª evolução) no 1º dia,
+A cada 10 XP o pet ganha 1 moeda (retroativo e também desfeito pelo "desfazer").
+O nível N pede 75 × (N−1)² XP. Com um dia bom (~1.250 XP): nível 5 (1ª evolução) no 1º dia,
 nível 10 (2ª evolução) em ~5 dias.
 
 Cada item da loja tem **nível mínimo** (2 a 14) e **preço crescente** (10 a 140 moedas). O catálogo

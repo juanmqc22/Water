@@ -3,23 +3,24 @@
 
 import { dayKey, startOfDay, addDays, atHour, hoursOf, clamp, inWork, MIN } from './util.js';
 
+// Números grandes para cada ação dar gosto; a curva e as moedas compensam.
 export const RULES = {
-  waterPer50ml: 1, // até a meta: 2,5 L = 50 XP
-  goalBonus: 20,
-  streakStep: 2, // +2 por dia de sequência, até +20
+  waterPer50ml: 6, // copo de 250 ml = 30 XP; até a meta (2,5 L = 300 XP)
+  goalBonus: 100,
+  streakStep: 10, // +10 por dia de sequência, até +100
   streakMax: 10,
-  stretch: 10, stretchMax: 8,
-  eyes: 3, eyesMax: 10,
-  focus: 15, focusMax: 6,
-  tasks: [10, 10, 10, 5, 5, 5], taskRest: 2, // rende menos depois de muitas no dia
+  stretch: 50, stretchMax: 8,
+  eyes: 25, eyesMax: 10,
+  focus: 75, focusMax: 6,
+  tasks: [50, 50, 50, 25, 25, 25], taskRest: 10, // rende menos depois de muitas no dia
 };
 
-// Moedas: 1 a cada 2 XP. Vêm do XP, então também não dá para inflar.
-export const COIN_XP = 2;
+// Moedas: 1 a cada 10 XP. Vêm do XP, então também não dá para inflar.
+export const COIN_XP = 10;
 
-// Curva de nível: o nível N pede LEVEL_K × (N−1)² XP. Com ~250 XP/dia:
+// Curva de nível: o nível N pede LEVEL_K × (N−1)² XP. Com ~1.250 XP/dia:
 // nível 5 no 1º dia, 10 em ~5 dias, catálogo inteiro em ~10 dias.
-const LEVEL_K = 14;
+const LEVEL_K = 75;
 
 export const xpAt = (level) => LEVEL_K * (level - 1) ** 2;
 export const levelFor = (xp) => Math.floor(Math.sqrt(xp / LEVEL_K)) + 1;
